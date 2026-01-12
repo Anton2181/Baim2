@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 
 from flask import Flask, redirect, render_template, request, url_for
@@ -72,7 +72,7 @@ def login():
                     success = user is not None
                     cursor.execute(
                         "INSERT INTO login_audit (username, success, created_at) VALUES (%s, %s, %s)",
-                        (username, int(success), datetime.utcnow()),
+                        (username, int(success), datetime.now(timezone.utc)),
                     )
                     if success:
                         message = "Login successful!"
