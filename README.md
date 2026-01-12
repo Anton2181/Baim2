@@ -98,14 +98,16 @@ Environment options:
 This script uses a time-based `IF(..., SLEEP, ...)` condition to check a wordlist against the stored hash for a user, and then attempts login when a delay is observed.
 
 ```bash
-python3 scripts/time_sqli_wordlist.py --base-url http://127.0.0.1:5000 \\
-  --username clinician \\
-  --wordlist scripts/wordlist.txt \\
-  --delay 3 \\
-  --threshold 2.5
+python3 scripts/time_sqli_wordlist.py --base-url http://127.0.0.1:5000 \
+  --username clinician \
+  --wordlist scripts/wordlist.txt \
+  --delay 3 \
+  --threshold 2.5 \
+  --timeout 15
 ```
 
 Notes:
 
 - Adjust `--delay` and `--threshold` if your VM is slow.
+- Increase `--timeout` if the server responds slowly or you see timeout errors.
 - The provided `wordlist.txt` includes the seeded password (`clinic2024`) so the script demonstrates a full compromise flow.

