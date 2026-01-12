@@ -111,3 +111,16 @@ Notes:
 - Adjust `--delay` and `--threshold` if your VM is slow.
 - Increase `--timeout` if the server responds slowly or you see timeout errors.
 - The provided `wordlist.txt` includes the seeded password (`clinic2024`) so the script demonstrates a full compromise flow.
+- If you are copy-pasting from chat/markdown, ensure the command uses **real newlines** with trailing `\` (not literal `\\n`).
+
+Single-line version (safe to paste):
+
+```bash
+python3 scripts/time_sqli_wordlist.py --base-url http://127.0.0.1:5000 --username clinician --wordlist scripts/wordlist.txt --delay 3 --threshold 2.5 --timeout 15 --preflight
+```
+
+If you keep seeing timeouts, confirm the app is running and reachable:
+
+```bash
+curl -I http://127.0.0.1:5000/login
+```

