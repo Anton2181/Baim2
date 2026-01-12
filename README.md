@@ -124,3 +124,5 @@ If you keep seeing timeouts, confirm the app is running and reachable:
 ```bash
 curl -I http://127.0.0.1:5000/login
 ```
+
+If you are on Kali (or a machine with system proxy settings), try disabling proxies inside the script (default) or explicitly enable them with `--use-proxy` if required by your environment.

