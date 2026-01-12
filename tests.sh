@@ -37,18 +37,46 @@ function assert_status() {
 }
 
 printf "Checking classic SQLi is blocked...\n"
-classic_time=$(curl -s -o /tmp/ctf_classic.html -w "%{time_total}" \
-  -X POST "$BASE_URL/login" \
-  -d "username=' OR 1=1 --" \
-  -d "password=anything" \
-  -d "sort=created_at")
+classic_payloads=(
+  "' OR 1=1 --"
+  "' OR '1'='1' --"
+  "\" OR 1=1 --"
+  "' OR 1=1 #"
+  "' OR 1=1/*"
+  "' UNION SELECT 1,2,3 --"
+  "' OR 'a'='a"
+)
 
-if ! grep -q "Login failed" /tmp/ctf_classic.html; then
-  echo "FAIL: Classic SQLi did not fail as expected." >&2
-  exit 1
-fi
+for payload in "${classic_payloads[@]}"; do
+  classic_time=$(curl -s -o /tmp/ctf_classic.html -w "%{time_total}" \
+    -X POST "$BASE_URL/login" \
+    -d "username=$payload" \
+    -d "password=anything" \
+    -d "sort=created_at")
 
-assert_lt "$classic_time" 2
+  if ! grep -q "Login failed" /tmp/ctf_classic.html; then
+    echo "FAIL: Classic SQLi did not fail as expected for payload: $payload" >&2
+    exit 1
+  fi
+
+  assert_lt "$classic_time" 2
+done
+
+printf "Checking classic SQLi in password is blocked...\n"
+for payload in "${classic_payloads[@]}"; do
+  classic_time=$(curl -s -o /tmp/ctf_classic.html -w "%{time_total}" \
+    -X POST "$BASE_URL/login" \
+    -d "username=clinician" \
+    -d "password=$payload" \
+    -d "sort=created_at")
+
+  if ! grep -q "Login failed" /tmp/ctf_classic.html; then
+    echo "FAIL: Classic SQLi did not fail as expected for password payload: $payload" >&2
+    exit 1
+  fi
+
+  assert_lt "$classic_time" 2
+done
 
 printf "Checking normal sort values are fast...\n"
 created_time=$(curl -s -o /tmp/ctf_created.html -w "%{time_total}" \

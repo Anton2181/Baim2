@@ -72,9 +72,40 @@ The tests check:
 - Time-based SQLi payload on the `sort` parameter triggers a noticeable delay.
 - Legitimate sorting values (created_at / username) still return quickly.
 - An invalid `sort` value causes a 500 error (to show lack of whitelisting).
+- Multiple classic SQLi payloads in **both** username and password are rejected.
 
 Manual verification (optional):
 
 1. Try login with username `clinician` and password `clinic2024` to confirm success.
 2. Try classic SQLi in username: `' OR 1=1 --` and ensure it **fails**.
 3. Try time-based payload in `sort` and ensure the response is delayed.
+
+## Time-based SQLi helper scripts
+
+### 1) Quick delay probe
+
+```bash
+./scripts/time_sqli_probe.sh
+```
+
+Environment options:
+
+- `BASE_URL` (default `http://127.0.0.1:5000`)
+- `DELAY` (default `3`)
+
+### 2) Wordlist-based login discovery (time-based)
+
+This script uses a time-based `IF(..., SLEEP, ...)` condition to check a wordlist against the stored hash for a user, and then attempts login when a delay is observed.
+
+```bash
+python3 scripts/time_sqli_wordlist.py --base-url http://127.0.0.1:5000 \\
+  --username clinician \\
+  --wordlist scripts/wordlist.txt \\
+  --delay 3 \\
+  --threshold 2.5
+```
+
+Notes:
+
+- Adjust `--delay` and `--threshold` if your VM is slow.
+- The provided `wordlist.txt` includes the seeded password (`clinic2024`) so the script demonstrates a full compromise flow.
