@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clinic Portal CTF</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">Clinic Portal</div>
+    <nav>
+      <a href="{{ url_for('index') }}">Search</a>
+      <a href="{{ url_for('index') }}">Write</a>
+      <a href="{{ url_for('signup') }}">Sign up</a>
+      <a href="{{ url_for('login') }}">Sign in</a>
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer>
+    <p>CTF Training Portal • Internal Use Only</p>
+  </footer>
+</body>
+</html>
