@@ -13,6 +13,8 @@ WEBMIN_START_BOOT="${WEBMIN_START_BOOT:-n}"
 WEBMIN_HTTP_PORT="${WEBMIN_HTTP_PORT:-${WEBMIN_PORT}}"
 WEBMIN_IP="${WEBMIN_IP:-192.168.100.20}"
 WEBMIN_NETMASK="${WEBMIN_NETMASK:-255.255.255.0}"
+WEBMIN_CONFIG_DIR="${WEBMIN_CONFIG_DIR:-/etc/webmin}"
+WEBMIN_LOG_DIR="${WEBMIN_LOG_DIR:-/var/webmin}"
 
 configure_network() {
   local port="${WEBMIN_HTTP_PORT}"
@@ -78,6 +80,8 @@ cd "${tmp_dir}/webmin-${WEBMIN_VERSION}"
 
 echo "Running Webmin setup (accepting defaults)..."
 cat <<EOF | ./setup.sh "${INSTALL_DIR}"
+${WEBMIN_CONFIG_DIR}
+${WEBMIN_LOG_DIR}
 ${WEBMIN_PORT}
 ${WEBMIN_LOGIN}
 ${WEBMIN_PASSWORD}
