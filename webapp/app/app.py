@@ -10,11 +10,13 @@ from urllib.parse import urljoin
 
 import requests
 from flask import Flask, Response, redirect, render_template, request, session, url_for
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "data" / "app.db"
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 app.config["SECRET_KEY"] = "ctf-local-secret"
 app.config["WEBMIN_URL"] = os.getenv("WEBMIN_URL", "http://192.168.100.20:10000")
 app.config["WEBMIN_PROXY_TOKEN"] = os.getenv("WEBMIN_PROXY_TOKEN", "ctf-webmin-token")
