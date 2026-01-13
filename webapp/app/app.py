@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import re
 import sqlite3
 import time
 from pathlib import Path
@@ -17,6 +18,7 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = "ctf-local-secret"
 app.config["WEBMIN_URL"] = os.getenv("WEBMIN_URL", "http://192.168.100.20:10000")
 app.config["WEBMIN_PROXY_TOKEN"] = os.getenv("WEBMIN_PROXY_TOKEN", "ctf-webmin-token")
+app.config["WEBMIN_PREFIX"] = os.getenv("WEBMIN_PREFIX", "/admin/infra")
 
 
 def get_db() -> sqlite3.Connection:
@@ -98,7 +100,10 @@ def webmin_proxy_root(subpath: str | None = None) -> Response:
     if "user" not in session:
         return redirect(url_for("index"))
 
-    base_url = app.config["WEBMIN_URL"].rstrip("/") + "/"
+    base_url = app.config["WEBMIN_URL"].rstrip("/")
+    prefix = app.config["WEBMIN_PREFIX"].strip("/")
+    prefix_path = f"/{prefix}" if prefix else ""
+    base_url = f"{base_url}{prefix_path}/"
     target_path = subpath or ""
     target_url = urljoin(base_url, target_path)
     if request.query_string:
@@ -139,16 +144,24 @@ def webmin_proxy_root(subpath: str | None = None) -> Response:
         for name, value in upstream_response.headers.items()
         if name.lower() not in excluded_headers
     ]
-    proxy_base = url_for("webmin_proxy_root")
+    proxy_base = url_for("webmin_proxy_root").rstrip("/")
     location = upstream_response.headers.get("Location")
     if location:
         response_headers = [
             (name, value) for name, value in response_headers if name.lower() != "location"
         ]
         if location.startswith(base_url):
-            location = f"{proxy_base}/{location[len(base_url):].lstrip('/')}"
+            location_path = location[len(base_url) - 1 :]
+            if prefix_path and location_path.startswith(prefix_path):
+                location = f"{proxy_base}{location_path[len(prefix_path):]}"
+            elif location_path.startswith("/"):
+                location = f"{proxy_base}{location_path}"
+            else:
+                location = f"{proxy_base}/{location_path}"
+        elif prefix_path and location.startswith(prefix_path):
+            location = f"{proxy_base}{location[len(prefix_path):]}"
         elif location.startswith("/"):
-            location = f"{proxy_base}/{location.lstrip('/')}"
+            location = f"{proxy_base}{location}"
         response_headers.append(("Location", location))
 
     content = upstream_response.content
@@ -163,12 +176,25 @@ def webmin_proxy_root(subpath: str | None = None) -> Response:
             if head_close != -1:
                 base_tag = f'<base href="{proxy_base}/">'
                 html = f"{html[:head_close + 1]}{base_tag}{html[head_close + 1:]}"
-        html = (
-            html.replace('href="/', f'href="{proxy_base}/')
-            .replace('src="/', f'src="{proxy_base}/')
-            .replace('action="/', f'action="{proxy_base}/')
-            .replace("url(/", f"url({proxy_base}/")
-        )
+        if prefix_path:
+            prefix_escaped = re.escape(prefix_path.lstrip("/"))
+            html = re.sub(
+                rf'(href|src|action)="/(?!{prefix_escaped})([^"]*)"',
+                rf'\1="{proxy_base}/\2"',
+                html,
+            )
+            html = re.sub(
+                rf"url\(/(?!{prefix_escaped})",
+                f"url({proxy_base}/",
+                html,
+            )
+        else:
+            html = (
+                html.replace('href="/', f'href="{proxy_base}/')
+                .replace('src="/', f'src="{proxy_base}/')
+                .replace('action="/', f'action="{proxy_base}/')
+                .replace("url(/", f"url({proxy_base}/")
+            )
         content = html.encode(encoding)
 
     return Response(

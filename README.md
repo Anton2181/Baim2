@@ -110,7 +110,7 @@ Player -X-> Webmin (zablokowane)
 
 Na hoście Webmin:
 - Webmin nasłuchuje tylko na IP wewnętrznym (`192.168.100.20`),
-- ruch na port 10000 jest dozwolony wyłącznie z IP WebApp (`192.168.100.10`) oraz podsieci WebApp (`192.168.100.0/24`).
+- ruch na port 10000 jest dozwolony wyłącznie z IP WebApp (`192.168.100.10`).
 
 ### Instalacja
 
@@ -130,14 +130,15 @@ Możesz je nadpisać zmiennymi środowiskowymi `WEBMIN_LOGIN` i `WEBMIN_PASSWORD
 Skrypt wspiera też `WEBMIN_PORT`, `WEBMIN_SSL` oraz `WEBMIN_START_BOOT`.
 Adres IP dla tego hosta jest ustawiany na `192.168.100.20/24` (możesz nadpisać przez `WEBMIN_IP`, `WEBMIN_NETMASK`).
 Jeśli instalacja Webmina zgłasza błąd katalogów konfig/logów, możesz ustawić `WEBMIN_CONFIG_DIR` i `WEBMIN_LOG_DIR` (domyślnie `/etc/webmin` i `/var/webmin`). W razie problemów z Perlem ustaw `WEBMIN_PERL_PATH` (domyślnie `/usr/bin/perl`).
-Port Webmina jest domyślnie dostępny tylko z IP WebApp (`192.168.100.10`) oraz podsieci WebApp (`192.168.100.0/24`). Możesz nadpisać je przez `WEBAPP_IP` i `WEBAPP_SUBNET`.
+Port Webmina jest domyślnie dostępny tylko z IP WebApp (`192.168.100.10`). Możesz nadpisać je przez `WEBAPP_IP`.
+Reverse proxy ustawia Webmin pod ścieżką `/admin/infra` (możesz nadpisać przez `WEBMIN_WEBPREFIX`), a referer akceptowany przez Webmina jest ustawiany na host WebApp (domyślnie `192.168.100.10:5000`, zmienna `WEBAPP_HOST`).
 
-Po instalacji Webmin będzie dostępny pod `http://<IP>:10000` (upewnij się, że port 10000 jest otwarty).
+Po instalacji Webmin będzie dostępny tylko przez WebApp (direct access do `http://<IP>:10000` powinien być blokowany).
 
 ### Widok Webmin w webapp
 
 Po zalogowaniu do aplikacji `webapp` dostępny jest link do Webmina przez reverse proxy (`/admin/infra`).
-Adres Webmina można ustawić przez `WEBMIN_URL`, domyślnie `http://192.168.100.20:10000`. Token proxy jest ustawiany przez `WEBMIN_PROXY_TOKEN`.
+Adres Webmina można ustawić przez `WEBMIN_URL`, domyślnie `http://192.168.100.20:10000`. Ścieżkę proxy można nadpisać przez `WEBMIN_PREFIX` (domyślnie `/admin/infra`). Token proxy jest ustawiany przez `WEBMIN_PROXY_TOKEN`.
 
 ### Struktura
 
