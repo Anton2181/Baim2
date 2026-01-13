@@ -46,19 +46,19 @@ EOF
   fi
 
   if command -v ufw >/dev/null 2>&1; then
-    ufw allow from "${WEBAPP_IP}" to any port "${port}" proto tcp >/dev/null || true
-    ufw deny "${port}/tcp" >/dev/null || true
+    ufw insert 1 allow from "${WEBAPP_IP}" to any port "${port}" proto tcp >/dev/null || true
+    ufw insert 2 deny "${port}/tcp" >/dev/null || true
   elif command -v firewall-cmd >/dev/null 2>&1; then
-    firewall-cmd --add-rich-rule="rule family=ipv4 source address=${WEBAPP_IP} port port=${port} protocol=tcp accept" \
+    firewall-cmd --add-rich-rule="rule family=ipv4 priority=10 source address=${WEBAPP_IP} port port=${port} protocol=tcp accept" \
       --permanent >/dev/null 2>&1 || true
-    firewall-cmd --add-rich-rule="rule family=ipv4 port port=${port} protocol=tcp drop" \
+    firewall-cmd --add-rich-rule="rule family=ipv4 priority=100 port port=${port} protocol=tcp drop" \
       --permanent >/dev/null 2>&1 || true
     firewall-cmd --reload >/dev/null 2>&1 || true
   elif command -v iptables >/dev/null 2>&1; then
     iptables -C INPUT -p tcp -s "${WEBAPP_IP}" --dport "${port}" -j ACCEPT >/dev/null 2>&1 || \
       iptables -I INPUT -p tcp -s "${WEBAPP_IP}" --dport "${port}" -j ACCEPT >/dev/null 2>&1 || true
     iptables -C INPUT -p tcp --dport "${port}" -j DROP >/dev/null 2>&1 || \
-      iptables -I INPUT -p tcp --dport "${port}" -j DROP >/dev/null 2>&1 || true
+      iptables -A INPUT -p tcp --dport "${port}" -j DROP >/dev/null 2>&1 || true
   fi
 }
 
