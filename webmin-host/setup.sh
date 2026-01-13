@@ -16,6 +16,7 @@ WEBMIN_NETMASK="${WEBMIN_NETMASK:-255.255.255.0}"
 WEBMIN_CONFIG_DIR="${WEBMIN_CONFIG_DIR:-/etc/webmin}"
 WEBMIN_LOG_DIR="${WEBMIN_LOG_DIR:-/var/webmin}"
 WEBMIN_PERL_PATH="${WEBMIN_PERL_PATH:-/usr/bin/perl}"
+WEBAPP_IP="${WEBAPP_IP:-192.168.100.10}"
 
 configure_network() {
   local port="${WEBMIN_HTTP_PORT}"
@@ -45,13 +46,14 @@ EOF
   fi
 
   if command -v ufw >/dev/null 2>&1; then
-    ufw allow "${port}/tcp" >/dev/null || true
+    ufw allow from "${WEBAPP_IP}" to any port "${port}" proto tcp >/dev/null || true
   elif command -v firewall-cmd >/dev/null 2>&1; then
-    firewall-cmd --add-port="${port}/tcp" --permanent >/dev/null 2>&1 || true
+    firewall-cmd --add-rich-rule="rule family=ipv4 source address=${WEBAPP_IP} port port=${port} protocol=tcp accept" \
+      --permanent >/dev/null 2>&1 || true
     firewall-cmd --reload >/dev/null 2>&1 || true
   elif command -v iptables >/dev/null 2>&1; then
-    iptables -C INPUT -p tcp --dport "${port}" -j ACCEPT >/dev/null 2>&1 || \
-      iptables -I INPUT -p tcp --dport "${port}" -j ACCEPT >/dev/null 2>&1 || true
+    iptables -C INPUT -p tcp -s "${WEBAPP_IP}" --dport "${port}" -j ACCEPT >/dev/null 2>&1 || \
+      iptables -I INPUT -p tcp -s "${WEBAPP_IP}" --dport "${port}" -j ACCEPT >/dev/null 2>&1 || true
   fi
 }
 

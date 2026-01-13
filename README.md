@@ -117,13 +117,14 @@ Możesz je nadpisać zmiennymi środowiskowymi `WEBMIN_LOGIN` i `WEBMIN_PASSWORD
 Skrypt wspiera też `WEBMIN_PORT`, `WEBMIN_SSL` oraz `WEBMIN_START_BOOT`.
 Adres IP dla tego hosta jest ustawiany na `192.168.100.20/24` (możesz nadpisać przez `WEBMIN_IP`, `WEBMIN_NETMASK`).
 Jeśli instalacja Webmina zgłasza błąd katalogów konfig/logów, możesz ustawić `WEBMIN_CONFIG_DIR` i `WEBMIN_LOG_DIR` (domyślnie `/etc/webmin` i `/var/webmin`). W razie problemów z Perlem ustaw `WEBMIN_PERL_PATH` (domyślnie `/usr/bin/perl`).
+Port Webmina jest domyślnie dostępny tylko z IP WebApp (`192.168.100.10`). Możesz nadpisać je przez `WEBAPP_IP`.
 
 Po instalacji Webmin będzie dostępny pod `http://<IP>:10000` (upewnij się, że port 10000 jest otwarty).
 
 ### Widok Webmin w webapp
 
-Po zalogowaniu do aplikacji `webapp` dostępny jest widok **Webmin admin** (iframe).
-Adres Webmina można ustawić przez `WEBMIN_URL`, domyślnie `http://192.168.100.20:10000`.
+Po zalogowaniu do aplikacji `webapp` dostępny jest link do Webmina przez reverse proxy (`/admin/infra`).
+Adres Webmina można ustawić przez `WEBMIN_URL`, domyślnie `http://192.168.100.20:10000`. Token proxy jest ustawiany przez `WEBMIN_PROXY_TOKEN`.
 
 ### Struktura
 
