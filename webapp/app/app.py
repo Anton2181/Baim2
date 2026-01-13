@@ -140,8 +140,28 @@ def webmin_proxy_root(subpath: str | None = None) -> Response:
             location = f"{proxy_base}/{location.lstrip('/')}"
         response_headers.append(("Location", location))
 
+    content = upstream_response.content
+    content_type = upstream_response.headers.get("Content-Type", "")
+    if "text/html" in content_type:
+        encoding = upstream_response.encoding or "utf-8"
+        html = content.decode(encoding, errors="ignore")
+        lower_html = html.lower()
+        head_index = lower_html.find("<head")
+        if head_index != -1:
+            head_close = html.find(">", head_index)
+            if head_close != -1:
+                base_tag = f'<base href="{proxy_base}/">'
+                html = f"{html[:head_close + 1]}{base_tag}{html[head_close + 1:]}"
+        html = (
+            html.replace('href="/', f'href="{proxy_base}/')
+            .replace('src="/', f'src="{proxy_base}/')
+            .replace('action="/', f'action="{proxy_base}/')
+            .replace("url(/", f"url({proxy_base}/")
+        )
+        content = html.encode(encoding)
+
     return Response(
-        upstream_response.content,
+        content,
         status=upstream_response.status_code,
         headers=response_headers,
     )
