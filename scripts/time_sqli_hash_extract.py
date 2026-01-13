@@ -113,12 +113,14 @@ def main() -> None:
                 print(f"Request failed: {exc}. Check that the server is reachable.")
                 return
             print(
-                f"Position {position}/{args.length} char {char!r}: {elapsed:.2f}s"
+                f"Position {position}/{args.length} char {char!r}: {elapsed:.2f}s",
+                flush=True,
             )
             if elapsed >= args.threshold:
                 extracted.append(char)
                 print(
-                    f"Matched position {position}: {char} (hash so far: {''.join(extracted)})"
+                    f"Matched position {position}: {char} (hash so far: {''.join(extracted)})",
+                    flush=True,
                 )
                 found = True
                 break
