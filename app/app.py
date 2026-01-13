@@ -23,7 +23,7 @@ def get_db() -> sqlite3.Connection:
 
 
 def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+    return hashlib.md5(password.encode("utf-8")).hexdigest()
 
 
 @app.get("/")

@@ -45,7 +45,7 @@ Aplikacja wystartuje na `http://127.0.0.1:5000`.
 
 ## Skrypt do time‑based ekstrakcji hasha (dla konta admin)
 
-Skrypt automatycznie wydobywa hash `password_hash` użytkownika `admin` wyłącznie na podstawie czasu odpowiedzi i na bieżąco dopisuje znalezione znaki:
+Skrypt automatycznie wydobywa hash `password_hash` (MD5) użytkownika `admin` wyłącznie na podstawie czasu odpowiedzi i na bieżąco dopisuje znalezione znaki:
 
 ```bash
 ./scripts/attack_timed_sqli.py --base-url http://127.0.0.1:5000

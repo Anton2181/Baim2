@@ -10,7 +10,7 @@ DB_PATH = DATA_DIR / "app.db"
 
 
 def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+    return hashlib.md5(password.encode("utf-8")).hexdigest()
 
 
 def main() -> None:
