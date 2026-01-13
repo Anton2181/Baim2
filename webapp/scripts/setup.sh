@@ -59,6 +59,12 @@ EOF
 
 configure_network
 
+sudo_prefix=$(sudo_cmd) || sudo_prefix=""
+if [[ -n ${sudo_prefix} ]] || [[ ${EUID:-$(id -u)} -eq 0 ]]; then
+  ${sudo_prefix} apt-get update -y >/dev/null 2>&1 || true
+  ${sudo_prefix} apt-get install -y curl python3.13-venv >/dev/null 2>&1 || true
+fi
+
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip

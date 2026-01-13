@@ -57,6 +57,9 @@ if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
   exit 1
 fi
 
+apt-get update -y >/dev/null 2>&1 || true
+apt-get install -y curl python3.13-venv >/dev/null 2>&1 || true
+
 tmp_dir=$(mktemp -d)
 cleanup() {
   rm -rf "${tmp_dir}"
