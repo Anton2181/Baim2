@@ -123,7 +123,7 @@ Po instalacji Webmin będzie dostępny pod `http://<IP>:10000` (upewnij się, ż
 ### Widok Webmin w webapp
 
 Po zalogowaniu do aplikacji `webapp` dostępny jest widok **Webmin admin** (iframe).
-Adres Webmina można ustawić przez `WEBMIN_URL`, np. `http://webmin-host:10000`.
+Adres Webmina można ustawić przez `WEBMIN_URL`, domyślnie `http://192.168.100.20:10000`.
 
 ### Struktura
 

@@ -13,7 +13,7 @@ DB_PATH = BASE_DIR / "data" / "app.db"
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "ctf-local-secret"
-app.config["WEBMIN_URL"] = os.getenv("WEBMIN_URL", "http://localhost:10000")
+app.config["WEBMIN_URL"] = os.getenv("WEBMIN_URL", "http://192.168.100.20:10000")
 
 
 def get_db() -> sqlite3.Connection:
