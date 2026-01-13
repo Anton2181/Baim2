@@ -10,6 +10,20 @@ WEBMIN_LOGIN="${WEBMIN_LOGIN:-admin}"
 WEBMIN_PASSWORD="${WEBMIN_PASSWORD:-admin123}"
 WEBMIN_SSL="${WEBMIN_SSL:-n}"
 WEBMIN_START_BOOT="${WEBMIN_START_BOOT:-n}"
+WEBMIN_HTTP_PORT="${WEBMIN_HTTP_PORT:-${WEBMIN_PORT}}"
+
+configure_network() {
+  local port="${WEBMIN_HTTP_PORT}"
+  if command -v ufw >/dev/null 2>&1; then
+    ufw allow "${port}/tcp" >/dev/null || true
+  elif command -v firewall-cmd >/dev/null 2>&1; then
+    firewall-cmd --add-port="${port}/tcp" --permanent >/dev/null 2>&1 || true
+    firewall-cmd --reload >/dev/null 2>&1 || true
+  elif command -v iptables >/dev/null 2>&1; then
+    iptables -C INPUT -p tcp --dport "${port}" -j ACCEPT >/dev/null 2>&1 || \
+      iptables -I INPUT -p tcp --dport "${port}" -j ACCEPT >/dev/null 2>&1 || true
+  fi
+}
 
 if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
   echo "This script must be run as root (use sudo)." >&2
@@ -21,6 +35,8 @@ cleanup() {
   rm -rf "${tmp_dir}"
 }
 trap cleanup EXIT
+
+configure_network
 
 echo "Downloading Webmin ${WEBMIN_VERSION} from SourceForge..."
 curl -L -o "${tmp_dir}/${WEBMIN_TARBALL}" "${WEBMIN_URL}"
