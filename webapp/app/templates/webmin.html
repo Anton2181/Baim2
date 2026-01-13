@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card card--wide">
+  <h1>Webmin administration</h1>
+  <p class="muted">
+    This view is only available after logging in. If the Webmin host is running,
+    it will appear below.
+  </p>
+  <div class="webmin-frame">
+    <iframe src="{{ webmin_url }}" title="Webmin" loading="lazy"></iframe>
+  </div>
+</section>
+{% endblock %}

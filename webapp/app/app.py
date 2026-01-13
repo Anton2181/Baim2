@@ -1,17 +1,19 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import sqlite3
 import time
 from pathlib import Path
 
-from flask import Flask, render_template, request
+from flask import Flask, redirect, render_template, request, session, url_for
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "data" / "app.db"
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "ctf-local-secret"
+app.config["WEBMIN_URL"] = os.getenv("WEBMIN_URL", "http://localhost:10000")
 
 
 def get_db() -> sqlite3.Connection:
@@ -45,10 +47,10 @@ def login() -> str:
     conn.close()
 
     if user:
-        message = f"Welcome back, {user['username']}!"
-    else:
-        message = "Invalid username or password."
+        session["user"] = user["username"]
+        return redirect(url_for("webmin_admin"))
 
+    message = "Invalid username or password."
     return render_template("index.html", message=message)
 
 
@@ -72,6 +74,24 @@ def reset_submit() -> str:
 
     message = "If the account exists, an email has been sent."
     return render_template("reset.html", message=message)
+
+
+@app.get("/logout")
+def logout() -> str:
+    session.pop("user", None)
+    return redirect(url_for("index"))
+
+
+@app.get("/admin/webmin")
+def webmin_admin() -> str:
+    if "user" not in session:
+        return redirect(url_for("index"))
+    return render_template("webmin.html", webmin_url=app.config["WEBMIN_URL"])
+
+
+@app.context_processor
+def inject_session() -> dict[str, object]:
+    return {"logged_in": "user" in session, "current_user": session.get("user")}
 
 
 if __name__ == "__main__":

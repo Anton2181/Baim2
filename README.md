@@ -105,7 +105,20 @@ cd webmin-host
 sudo ./setup.sh
 ```
 
-Po instalacji Webmin będzie dostępny pod `https://<IP>:10000` (upewnij się, że port 10000 jest otwarty).
+Domyślne dane logowania to:
+
+- login: `admin`
+- hasło: `admin123`
+
+Możesz je nadpisać zmiennymi środowiskowymi `WEBMIN_LOGIN` i `WEBMIN_PASSWORD`.
+Skrypt wspiera też `WEBMIN_PORT`, `WEBMIN_SSL` oraz `WEBMIN_START_BOOT`.
+
+Po instalacji Webmin będzie dostępny pod `http://<IP>:10000` (upewnij się, że port 10000 jest otwarty).
+
+### Widok Webmin w webapp
+
+Po zalogowaniu do aplikacji `webapp` dostępny jest widok **Webmin admin** (iframe).
+Adres Webmina można ustawić przez `WEBMIN_URL`, np. `http://webmin-host:10000`.
 
 ### Struktura
 
