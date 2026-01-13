@@ -110,9 +110,7 @@ def main() -> None:
                 )
                 return
             except URLError as exc:
-                print(
-                    f"Request failed: {exc}. Check that the server is reachable."
-                )
+                print(f"Request failed: {exc}. Check that the server is reachable.")
                 return
             print(
                 f"Position {position}/{args.length} char {char!r}: {elapsed:.2f}s"
