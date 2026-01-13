@@ -110,7 +110,7 @@ Player -X-> Webmin (zablokowane)
 
 Na hoście Webmin:
 - Webmin nasłuchuje tylko na IP wewnętrznym (`192.168.100.20`),
-- ruch na port 10000 jest dozwolony wyłącznie z IP WebApp (`192.168.100.10`).
+- ruch na port 10000 jest dozwolony wyłącznie z IP WebApp (`192.168.100.10`) oraz podsieci WebApp (`192.168.100.0/24`).
 
 ### Instalacja
 
@@ -130,7 +130,7 @@ Możesz je nadpisać zmiennymi środowiskowymi `WEBMIN_LOGIN` i `WEBMIN_PASSWORD
 Skrypt wspiera też `WEBMIN_PORT`, `WEBMIN_SSL` oraz `WEBMIN_START_BOOT`.
 Adres IP dla tego hosta jest ustawiany na `192.168.100.20/24` (możesz nadpisać przez `WEBMIN_IP`, `WEBMIN_NETMASK`).
 Jeśli instalacja Webmina zgłasza błąd katalogów konfig/logów, możesz ustawić `WEBMIN_CONFIG_DIR` i `WEBMIN_LOG_DIR` (domyślnie `/etc/webmin` i `/var/webmin`). W razie problemów z Perlem ustaw `WEBMIN_PERL_PATH` (domyślnie `/usr/bin/perl`).
-Port Webmina jest domyślnie dostępny tylko z IP WebApp (`192.168.100.10`). Możesz nadpisać je przez `WEBAPP_IP`.
+Port Webmina jest domyślnie dostępny tylko z IP WebApp (`192.168.100.10`) oraz podsieci WebApp (`192.168.100.0/24`). Możesz nadpisać je przez `WEBAPP_IP` i `WEBAPP_SUBNET`.
 
 Po instalacji Webmin będzie dostępny pod `http://<IP>:10000` (upewnij się, że port 10000 jest otwarty).
 

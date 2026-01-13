@@ -17,6 +17,7 @@ WEBMIN_CONFIG_DIR="${WEBMIN_CONFIG_DIR:-/etc/webmin}"
 WEBMIN_LOG_DIR="${WEBMIN_LOG_DIR:-/var/webmin}"
 WEBMIN_PERL_PATH="${WEBMIN_PERL_PATH:-/usr/bin/perl}"
 WEBAPP_IP="${WEBAPP_IP:-192.168.100.10}"
+WEBAPP_SUBNET="${WEBAPP_SUBNET:-192.168.100.0/24}"
 
 configure_network() {
   local port="${WEBMIN_HTTP_PORT}"
@@ -47,9 +48,12 @@ EOF
 
   if command -v ufw >/dev/null 2>&1; then
     ufw insert 1 allow from "${WEBAPP_IP}" to any port "${port}" proto tcp >/dev/null || true
-    ufw insert 2 deny "${port}/tcp" >/dev/null || true
+    ufw insert 2 allow from "${WEBAPP_SUBNET}" to any port "${port}" proto tcp >/dev/null || true
+    ufw insert 3 deny "${port}/tcp" >/dev/null || true
   elif command -v firewall-cmd >/dev/null 2>&1; then
     firewall-cmd --add-rich-rule="rule family=ipv4 priority=10 source address=${WEBAPP_IP} port port=${port} protocol=tcp accept" \
+      --permanent >/dev/null 2>&1 || true
+    firewall-cmd --add-rich-rule="rule family=ipv4 priority=20 source address=${WEBAPP_SUBNET} port port=${port} protocol=tcp accept" \
       --permanent >/dev/null 2>&1 || true
     firewall-cmd --add-rich-rule="rule family=ipv4 priority=100 port port=${port} protocol=tcp drop" \
       --permanent >/dev/null 2>&1 || true
@@ -57,6 +61,8 @@ EOF
   elif command -v iptables >/dev/null 2>&1; then
     iptables -C INPUT -p tcp -s "${WEBAPP_IP}" --dport "${port}" -j ACCEPT >/dev/null 2>&1 || \
       iptables -I INPUT -p tcp -s "${WEBAPP_IP}" --dport "${port}" -j ACCEPT >/dev/null 2>&1 || true
+    iptables -C INPUT -p tcp -s "${WEBAPP_SUBNET}" --dport "${port}" -j ACCEPT >/dev/null 2>&1 || \
+      iptables -I INPUT -p tcp -s "${WEBAPP_SUBNET}" --dport "${port}" -j ACCEPT >/dev/null 2>&1 || true
     iptables -C INPUT -p tcp --dport "${port}" -j DROP >/dev/null 2>&1 || \
       iptables -A INPUT -p tcp --dport "${port}" -j DROP >/dev/null 2>&1 || true
   fi
@@ -105,7 +111,7 @@ if [[ -f /etc/webmin/miniserv.conf ]]; then
   sed -i "/^deny=/d" /etc/webmin/miniserv.conf
   {
     echo "bind=${WEBMIN_IP}"
-    echo "allow=${WEBAPP_IP}"
+    echo "allow=${WEBAPP_IP} ${WEBAPP_SUBNET} 127.0.0.1"
     echo "deny=0.0.0.0/0"
   } >> /etc/webmin/miniserv.conf
 fi
