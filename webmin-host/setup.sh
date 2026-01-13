@@ -13,23 +13,29 @@ WEBMIN_START_BOOT="${WEBMIN_START_BOOT:-n}"
 WEBMIN_HTTP_PORT="${WEBMIN_HTTP_PORT:-${WEBMIN_PORT}}"
 WEBMIN_IP="${WEBMIN_IP:-192.168.100.20}"
 WEBMIN_NETMASK="${WEBMIN_NETMASK:-255.255.255.0}"
-WEBMIN_GATEWAY="${WEBMIN_GATEWAY:-192.168.100.1}"
 
 configure_network() {
-  local cmd_prefix
   local port="${WEBMIN_HTTP_PORT}"
-  local iface
-  cmd_prefix=""
-  iface=$(ip route show default 2>/dev/null | awk '{print $5}' | head -n 1)
+  local nat_iface
+  local internal_iface
+  local ifaces
+  nat_iface=$(ip route show default 2>/dev/null | awk '{print $5}' | head -n 1)
+  ifaces=$(ip -o link show | awk -F': ' '{print $2}' | grep -v '^lo$' || true)
+  internal_iface=$(echo "${ifaces}" | grep -v "^${nat_iface}$" | head -n 1)
 
-  if [[ -n ${iface} ]]; then
-    mkdir -p /etc/network/interfaces.d
-    tee /etc/network/interfaces.d/ctf-webmin.cfg >/dev/null <<EOF
-auto ${iface}
-iface ${iface} inet static
+  if [[ -n ${nat_iface} && -n ${internal_iface} ]]; then
+    tee /etc/network/interfaces >/dev/null <<EOF
+# Managed by webmin-host/setup.sh
+auto lo
+iface lo inet loopback
+
+auto ${nat_iface}
+iface ${nat_iface} inet dhcp
+
+auto ${internal_iface}
+iface ${internal_iface} inet static
   address ${WEBMIN_IP}
   netmask ${WEBMIN_NETMASK}
-  gateway ${WEBMIN_GATEWAY}
 EOF
     systemctl restart networking >/dev/null 2>&1 || \
       service networking restart >/dev/null 2>&1 || true
