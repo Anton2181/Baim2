@@ -110,6 +110,11 @@ if [[ -f /etc/webmin/miniserv.conf ]]; then
   } >> /etc/webmin/miniserv.conf
 fi
 
+if [[ -f /etc/webmin/config ]]; then
+  sed -i "/^referers_none=/d" /etc/webmin/config
+  echo "referers_none=0" >> /etc/webmin/config
+fi
+
 if command -v systemctl >/dev/null 2>&1; then
   systemctl restart webmin >/dev/null 2>&1 || true
 elif [[ -x /etc/init.d/webmin ]]; then
