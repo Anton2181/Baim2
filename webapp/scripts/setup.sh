@@ -1,16 +1,51 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+PORT=5000
+WEBAPP_IP="${WEBAPP_IP:-192.168.100.10}"
+WEBAPP_NETMASK="${WEBAPP_NETMASK:-255.255.255.0}"
+WEBAPP_GATEWAY="${WEBAPP_GATEWAY:-192.168.100.1}"
+
+sudo_cmd() {
+  if [[ ${EUID:-$(id -u)} -eq 0 ]]; then
+    echo ""
+  elif command -v sudo >/dev/null 2>&1; then
+    echo "sudo"
+  else
+    return 1
+  fi
+}
+
 configure_network() {
-  local port=5000
+  local iface
+  local cmd_prefix
+  iface=$(ip route show default 2>/dev/null | awk '{print $5}' | head -n 1)
+  cmd_prefix=$(sudo_cmd) || {
+    echo "Skipping network configuration (no sudo/root available)." >&2
+    return
+  }
+
+  if [[ -n ${iface} ]]; then
+    ${cmd_prefix} mkdir -p /etc/network/interfaces.d
+    ${cmd_prefix} tee /etc/network/interfaces.d/ctf-webapp.cfg >/dev/null <<EOF
+auto ${iface}
+iface ${iface} inet static
+  address ${WEBAPP_IP}
+  netmask ${WEBAPP_NETMASK}
+  gateway ${WEBAPP_GATEWAY}
+EOF
+    ${cmd_prefix} systemctl restart networking >/dev/null 2>&1 || \
+      ${cmd_prefix} service networking restart >/dev/null 2>&1 || true
+  fi
+
   if command -v ufw >/dev/null 2>&1; then
-    ufw allow "${port}/tcp" >/dev/null || true
+    ${cmd_prefix} ufw allow "${PORT}/tcp" >/dev/null || true
   elif command -v firewall-cmd >/dev/null 2>&1; then
-    firewall-cmd --add-port="${port}/tcp" --permanent >/dev/null 2>&1 || true
-    firewall-cmd --reload >/dev/null 2>&1 || true
+    ${cmd_prefix} firewall-cmd --add-port="${PORT}/tcp" --permanent >/dev/null 2>&1 || true
+    ${cmd_prefix} firewall-cmd --reload >/dev/null 2>&1 || true
   elif command -v iptables >/dev/null 2>&1; then
-    iptables -C INPUT -p tcp --dport "${port}" -j ACCEPT >/dev/null 2>&1 || \
-      iptables -I INPUT -p tcp --dport "${port}" -j ACCEPT >/dev/null 2>&1 || true
+    ${cmd_prefix} iptables -C INPUT -p tcp --dport "${PORT}" -j ACCEPT >/dev/null 2>&1 || \
+      ${cmd_prefix} iptables -I INPUT -p tcp --dport "${PORT}" -j ACCEPT >/dev/null 2>&1 || true
   fi
 }
 

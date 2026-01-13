@@ -23,6 +23,9 @@ Skrypt:
 - tworzy virtualenv w `.venv`,
 - instaluje zależności z `requirements.txt`,
 - inicjalizuje bazę danych SQLite.
+- konfiguruje statyczny adres IP (domyślnie `192.168.100.10/24`) i restartuje usługę `networking`.
+
+Możesz nadpisać ustawienia IP przez `WEBAPP_IP`, `WEBAPP_NETMASK`, `WEBAPP_GATEWAY`.
 
 ### Uruchomienie
 
@@ -112,6 +115,7 @@ Domyślne dane logowania to:
 
 Możesz je nadpisać zmiennymi środowiskowymi `WEBMIN_LOGIN` i `WEBMIN_PASSWORD`.
 Skrypt wspiera też `WEBMIN_PORT`, `WEBMIN_SSL` oraz `WEBMIN_START_BOOT`.
+Adres IP dla tego hosta jest ustawiany na `192.168.100.20/24` (możesz nadpisać przez `WEBMIN_IP`, `WEBMIN_NETMASK`, `WEBMIN_GATEWAY`).
 
 Po instalacji Webmin będzie dostępny pod `http://<IP>:10000` (upewnij się, że port 10000 jest otwarty).
 
