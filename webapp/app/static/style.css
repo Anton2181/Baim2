@@ -165,6 +165,18 @@ button {
   text-decoration: none;
 }
 
+.button-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #0b1120;
+  font-weight: 600;
+  text-decoration: none;
+}
+
 @media (max-width: 900px) {
   .page {
     grid-template-columns: 1fr;

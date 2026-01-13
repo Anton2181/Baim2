@@ -22,6 +22,10 @@
       <nav class="nav">
         <a href="/" class="nav__link">Sign in</a>
         <a href="/reset" class="nav__link">Reset access</a>
+        {% if logged_in %}
+          <a href="/admin/webmin" class="nav__link">Webmin admin</a>
+          <a href="/logout" class="nav__link">Sign out</a>
+        {% endif %}
       </nav>
       <div class="sidebar__footer">
         <p>Timed SQLi training lab</p>
