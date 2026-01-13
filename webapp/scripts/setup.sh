@@ -74,16 +74,14 @@ if [[ -n ${sudo_prefix} ]] || [[ ${EUID:-$(id -u)} -eq 0 ]]; then
   ${sudo_prefix} tee /etc/apache2/sites-available/webapp.conf >/dev/null <<EOF
 <VirtualHost *:80>
     ServerName ${WEBAPP_SERVER_NAME}
-
     ProxyPreserveHost On
-    RequestHeader set X-Forwarded-Proto "http"
 
-    # Webmin exposed under /admin/infra/ (backend is root /)
-    ProxyPass /admin/infra/ http://${WEBMIN_HOST}:${WEBMIN_PORT}/ nocanon
-    ProxyPassReverse /admin/infra/ http://${WEBMIN_HOST}:${WEBMIN_PORT}/
-    ProxyPassReverseCookiePath / /admin/infra
+    <Location /admin/infra/>
+        ProxyPass http://${WEBMIN_HOST}:${WEBMIN_PORT}/ nocanon
+        ProxyPassReverse http://${WEBMIN_HOST}:${WEBMIN_PORT}/
+        ProxyPassReverseCookiePath / /admin/infra
+    </Location>
 
-    # Your webapp
     ProxyPass / http://127.0.0.1:${PORT}/
     ProxyPassReverse / http://127.0.0.1:${PORT}/
 </VirtualHost>
