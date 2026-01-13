@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+  <h1>Webmin administration</h1>
+  <p class="muted">
+    Access to Webmin is proxied through the web application after login.
+  </p>
+  <a class="button-link" href="{{ webmin_proxy_url }}">Open Webmin via proxy</a>
+</section>
+{% endblock %}
