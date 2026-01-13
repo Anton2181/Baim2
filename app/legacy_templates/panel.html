@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Webmin 1.920 - Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0b1b2b;
+      color: #e2e8f0;
+      padding: 40px;
+    }
+    .card {
+      max-width: 640px;
+      margin: 0 auto;
+      background: #13243a;
+      padding: 28px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+    h1 {
+      margin-bottom: 8px;
+    }
+    .muted {
+      color: #94a3b8;
+      margin-bottom: 16px;
+    }
+    code {
+      background: rgba(15, 23, 42, 0.7);
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>System Status</h1>
+    <p class="muted">Legacy Webmin instance. Password change endpoint is enabled.</p>
+    <p>
+      This host intentionally emulates the vulnerable <code>password_change.cgi</code>
+      behavior for the CTF.
+    </p>
+  </div>
+</body>
+</html>

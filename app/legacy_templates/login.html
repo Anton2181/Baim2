@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Webmin 1.920</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0b1b2b;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .panel {
+      background: #13243a;
+      padding: 32px;
+      border-radius: 12px;
+      width: 360px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 12px;
+    }
+    .muted {
+      color: #94a3b8;
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      margin-bottom: 12px;
+    }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #0b1b2b;
+      color: #e2e8f0;
+    }
+    button {
+      margin-top: 8px;
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: none;
+      background: #38bdf8;
+      color: #0b1b2b;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .alert {
+      background: rgba(248, 113, 113, 0.15);
+      border: 1px solid rgba(248, 113, 113, 0.4);
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>Webmin 1.920</h1>
+    <p class="muted">Legacy control panel (training only).</p>
+    {% if message %}
+      <div class="alert">{{ message }}</div>
+    {% endif %}
+    <form method="post" action="/session_login.cgi">
+      <label>
+        Username
+        <input type="text" name="user" required />
+      </label>
+      <label>
+        Password
+        <input type="password" name="pass" required />
+      </label>
+      <button type="submit">Sign in</button>
+    </form>
+  </div>
+</body>
+</html>

@@ -22,6 +22,9 @@
       <nav class="nav">
         <a href="/" class="nav__link">Sign in</a>
         <a href="/reset" class="nav__link">Reset access</a>
+        {% if current_user %}
+          <a href="/admin" class="nav__link">Admin panel</a>
+        {% endif %}
       </nav>
       <div class="sidebar__footer">
         <p>Timed SQLi training lab</p>

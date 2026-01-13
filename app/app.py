@@ -5,7 +5,7 @@ import sqlite3
 import time
 from pathlib import Path
 
-from flask import Flask, render_template, request
+from flask import Flask, redirect, render_template, request, session, url_for
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "data" / "app.db"
@@ -24,6 +24,11 @@ def get_db() -> sqlite3.Connection:
 
 def hash_password(password: str) -> str:
     return hashlib.md5(password.encode("utf-8")).hexdigest()
+
+
+@app.context_processor
+def inject_user() -> dict[str, str | None]:
+    return {"current_user": session.get("user")}
 
 
 @app.get("/")
@@ -45,11 +50,24 @@ def login() -> str:
     conn.close()
 
     if user:
-        message = f"Welcome back, {user['username']}!"
-    else:
-        message = "Invalid username or password."
+        session["user"] = user["username"]
+        return redirect(url_for("admin_panel"))
 
+    message = "Invalid username or password."
     return render_template("index.html", message=message)
+
+
+@app.get("/admin")
+def admin_panel() -> str:
+    if "user" not in session:
+        return redirect(url_for("index"))
+    return render_template("admin.html")
+
+
+@app.post("/logout")
+def logout() -> str:
+    session.pop("user", None)
+    return redirect(url_for("index"))
 
 
 @app.get("/reset")

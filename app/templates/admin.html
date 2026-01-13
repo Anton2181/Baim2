@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+  <h1>Admin access hub</h1>
+  <p class="muted">Welcome, {{ current_user }}. This panel exposes the legacy host running on the same VM.</p>
+  <div class="alert">
+    Legacy service: <strong>Webmin 1.920</strong> (port 10000 on localhost).
+  </div>
+  <ul class="details">
+    <li><strong>Host:</strong> http://127.0.0.1:10000</li>
+    <li><strong>Login:</strong> admin</li>
+    <li><strong>Password:</strong> webmin-legacy</li>
+  </ul>
+  <p class="footnote">
+    The service is intentionally outdated for training purposes.
+  </p>
+  <form method="post" action="/logout">
+    <button type="submit" class="secondary">Sign out</button>
+  </form>
+</section>
+{% endblock %}

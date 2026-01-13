@@ -28,12 +28,14 @@ Skrypt:
 ```
 
 Aplikacja wystartuje na `http://127.0.0.1:5000`.
+Równolegle uruchamiany jest drugi host z legacy Webmin na `http://127.0.0.1:10000`.
 
 ### Dane testowe
 
 - login: `admin`
 - hasło: `admin123`
 - email: `admin@ctf.local`
+- webmin: `admin` / `webmin-legacy` (port 10000)
 
 ## Jak wykonać zadanie (instrukcja dla gracza)
 
@@ -42,6 +44,10 @@ Aplikacja wystartuje na `http://127.0.0.1:5000`.
 3. Zauważ, że pole **nie waliduje** poprawności emaila, a odpowiedź zawsze brzmi: "If the account exists, an email has been sent.".
 4. To wymusza **time‑based SQLi** jako jedyny kanał potwierdzania warunków.
 5. Użyj pomiaru czasu odpowiedzi do wnioskowania o danych (np. testy warunkowe z opóźnieniem).
+
+## Panel admina i legacy Webmin
+
+Po zalogowaniu administrator zobaczy panel z linkiem do osobnego hosta Webmin 1.920 działającego na tym samym VM (inny port). Użyj danych `admin` / `webmin-legacy`.
 
 ## Skrypt do time‑based ekstrakcji hasha (dla konta admin)
 
@@ -71,6 +77,14 @@ Skrypt testowy sprawdza:
 - identyczny output dla istniejącego i nieistniejącego emaila,
 - wyraźne opóźnienie odpowiedzi tylko przy time‑based SQLi.
 
+## Test RCE na legacy Webmin (po zalogowaniu)
+
+Uruchom aplikację, a następnie:
+
+```bash
+./scripts/test_webmin_rce.py
+```
+
 ## Struktura projektu
 
 ```
@@ -83,5 +97,6 @@ scripts/
   setup.sh
   run.sh
   test.sh
+  test_webmin_rce.py
   attack_timed_sqli.py
 ```
