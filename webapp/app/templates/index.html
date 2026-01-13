@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+  <h1>Secure login</h1>
+  <p class="muted">This login endpoint is parameterized and resilient to classic SQL injection.</p>
+  {% if logged_in %}
+    <div class="alert">You are logged in as {{ current_user }}. Use the sidebar to open Webmin.</div>
+  {% endif %}
+  {% if message %}
+    <div class="alert">{{ message }}</div>
+  {% endif %}
+  {% if not logged_in %}
+    <form class="form" method="post" action="/login">
+      <label>
+        Username
+        <input type="text" name="username" placeholder="admin" required />
+      </label>
+      <label>
+        Password
+        <input type="password" name="password" placeholder="••••••••" required />
+      </label>
+      <button type="submit">Sign in</button>
+    </form>
+  {% endif %}
+  <p class="footnote">Need help? <a href="/reset">Reset access</a></p>
+</section>
+{% endblock %}
