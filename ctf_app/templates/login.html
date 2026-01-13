@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="form-wrapper">
+  <div class="card">
+    <h2>Sign in</h2>
+    <p class="subtitle">Use your clinician credentials to continue.</p>
+    {% if message %}
+      <div class="flash {% if success %}success{% else %}error{% endif %}">{{ message }}</div>
+    {% endif %}
+    <form method="post">
+      <label>
+        Username
+        <input type="text" name="username" placeholder="doctor.jane" required />
+      </label>
+      <label>
+        Password
+        <input type="password" name="password" placeholder="••••••" required />
+      </label>
+      <input type="hidden" name="sort" value="{{ sort }}" />
+      <button class="primary" type="submit">Sign in</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Recent login attempts</h3>
+    <p class="subtitle">Sorted by <code>{{ sort }}</code></p>
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Status</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in recent_logins %}
+          <tr>
+            <td>{{ entry.username }}</td>
+            <td class="{{ 'success' if entry.success else 'error' }}">{{ 'OK' if entry.success else 'FAIL' }}</td>
+            <td>{{ entry.created_at }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="3">No login attempts yet.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

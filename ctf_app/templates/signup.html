@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="form-wrapper">
+  <div class="card">
+    <h2>Create account</h2>
+    <p class="subtitle">New clinician onboarding</p>
+    {% if message %}
+      <div class="flash error">{{ message }}</div>
+    {% endif %}
+    <form method="post">
+      <label>
+        Username
+        <input type="text" name="username" placeholder="dr.smith" required />
+      </label>
+      <label>
+        Password
+        <input type="password" name="password" placeholder="••••••" required />
+      </label>
+      <button class="primary" type="submit">Create account</button>
+    </form>
+  </div>
+  <div class="card info">
+    <h3>Secure onboarding</h3>
+    <p>Passwords are stored as SHA-256 hashes inside the clinic database.</p>
+    <p>Make sure to use approved accounts for the exercise.</p>
+  </div>
+</section>
+{% endblock %}

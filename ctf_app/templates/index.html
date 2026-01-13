@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>Doctor Scheduling Portal</h1>
+    <p>Manage clinic availability, appointments, and secure patient access from one place.</p>
+    <a class="primary" href="{{ url_for('login') }}">Access clinician login</a>
+  </div>
+  <div class="card">
+    <h2>Latest notices</h2>
+    <ul>
+      <li>New compliance checklist for the autumn release.</li>
+      <li>Staff training on privacy &amp; audit logging.</li>
+      <li>Emergency downtime drill scheduled Friday.</li>
+    </ul>
+  </div>
+</section>
+<section class="grid">
+  <article class="card">
+    <h3>Search</h3>
+    <p>Find patient schedules, shifts, and office notes instantly.</p>
+  </article>
+  <article class="card">
+    <h3>Write</h3>
+    <p>Record availability and update clinic activity logs.</p>
+  </article>
+  <article class="card">
+    <h3>Sign up</h3>
+    <p>Create a secure profile for your clinic access.</p>
+  </article>
+  <article class="card">
+    <h3>Sign in</h3>
+    <p>Authenticate to manage sensitive patient data.</p>
+  </article>
+</section>
+{% endblock %}
