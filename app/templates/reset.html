@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+  <h1>Password recovery</h1>
+  <p class="muted">This endpoint always responds with the same message, even if the email is unknown.</p>
+  {% if message %}
+    <div class="alert">{{ message }}</div>
+  {% endif %}
+  <form class="form" method="post" action="/reset" novalidate>
+    <label>
+      Email
+      <input type="text" name="email" placeholder="user@ctf.local" required />
+    </label>
+    <button type="submit">Send reset</button>
+  </form>
+  <p class="footnote">Return to <a href="/">Sign in</a></p>
+</section>
+{% endblock %}
