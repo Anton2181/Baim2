@@ -136,6 +136,8 @@ def webmin_proxy_root(subpath: str | None = None) -> Response:
         ]
         if location.startswith(base_url):
             location = f"{proxy_base}/{location[len(base_url):].lstrip('/')}"
+        elif location.startswith("/"):
+            location = f"{proxy_base}/{location.lstrip('/')}"
         response_headers.append(("Location", location))
 
     return Response(

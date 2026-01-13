@@ -47,13 +47,18 @@ EOF
 
   if command -v ufw >/dev/null 2>&1; then
     ufw allow from "${WEBAPP_IP}" to any port "${port}" proto tcp >/dev/null || true
+    ufw deny "${port}/tcp" >/dev/null || true
   elif command -v firewall-cmd >/dev/null 2>&1; then
     firewall-cmd --add-rich-rule="rule family=ipv4 source address=${WEBAPP_IP} port port=${port} protocol=tcp accept" \
+      --permanent >/dev/null 2>&1 || true
+    firewall-cmd --add-rich-rule="rule family=ipv4 port port=${port} protocol=tcp drop" \
       --permanent >/dev/null 2>&1 || true
     firewall-cmd --reload >/dev/null 2>&1 || true
   elif command -v iptables >/dev/null 2>&1; then
     iptables -C INPUT -p tcp -s "${WEBAPP_IP}" --dport "${port}" -j ACCEPT >/dev/null 2>&1 || \
       iptables -I INPUT -p tcp -s "${WEBAPP_IP}" --dport "${port}" -j ACCEPT >/dev/null 2>&1 || true
+    iptables -C INPUT -p tcp --dport "${port}" -j DROP >/dev/null 2>&1 || \
+      iptables -I INPUT -p tcp --dport "${port}" -j DROP >/dev/null 2>&1 || true
   fi
 }
 
@@ -93,6 +98,25 @@ ${WEBMIN_PASSWORD}
 ${WEBMIN_SSL}
 ${WEBMIN_START_BOOT}
 EOF
+
+if [[ -f /etc/webmin/miniserv.conf ]]; then
+  sed -i "/^bind=/d" /etc/webmin/miniserv.conf
+  sed -i "/^allow=/d" /etc/webmin/miniserv.conf
+  sed -i "/^deny=/d" /etc/webmin/miniserv.conf
+  {
+    echo "bind=${WEBMIN_IP}"
+    echo "allow=${WEBAPP_IP}"
+    echo "deny=0.0.0.0/0"
+  } >> /etc/webmin/miniserv.conf
+fi
+
+if command -v systemctl >/dev/null 2>&1; then
+  systemctl restart webmin >/dev/null 2>&1 || true
+elif [[ -x /etc/init.d/webmin ]]; then
+  /etc/init.d/webmin restart >/dev/null 2>&1 || true
+elif [[ -x /etc/webmin/restart ]]; then
+  /etc/webmin/restart >/dev/null 2>&1 || true
+fi
 
 echo "Webmin ${WEBMIN_VERSION} installed in ${INSTALL_DIR}."
 echo "Login: ${WEBMIN_LOGIN}"

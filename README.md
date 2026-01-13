@@ -99,6 +99,19 @@ webapp/
 
 ## Host: webmin
 
+### Architektura dostępu
+
+Webmin jest dostępny wyłącznie przez WebApp:
+
+```
+Player -> WebApp (/admin/infra) -> Reverse proxy -> Webmin
+Player -X-> Webmin (zablokowane)
+```
+
+Na hoście Webmin:
+- Webmin nasłuchuje tylko na IP wewnętrznym (`192.168.100.20`),
+- ruch na port 10000 jest dozwolony wyłącznie z IP WebApp (`192.168.100.10`).
+
 ### Instalacja
 
 Skrypt w `webmin-host/setup.sh` pobiera i instaluje **Webmin 1.920** z SourceForge (wersja podatna na CVE‑2019‑15107).
