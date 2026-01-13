@@ -135,9 +135,9 @@ def webmin_proxy_root(subpath: str | None = None) -> Response:
         for name, value in upstream_response.headers.items()
         if name.lower() not in excluded_headers
     ]
+    proxy_base = url_for("webmin_proxy_root")
     location = upstream_response.headers.get("Location")
     if location:
-        proxy_base = url_for("webmin_proxy_root")
         response_headers = [
             (name, value) for name, value in response_headers if name.lower() != "location"
         ]
