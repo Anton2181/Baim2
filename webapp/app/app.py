@@ -109,6 +109,10 @@ def webmin_proxy_root(subpath: str | None = None) -> Response:
         for key, value in request.headers.items()
         if key.lower() not in {"host", "content-length"}
     }
+    headers["Host"] = "127.0.0.1"
+    headers["X-Real-IP"] = "127.0.0.1"
+    headers["X-Forwarded-For"] = "127.0.0.1"
+    headers["X-Forwarded-Proto"] = request.scheme
     headers["X-Internal-Auth"] = app.config["WEBMIN_PROXY_TOKEN"]
 
     try:
