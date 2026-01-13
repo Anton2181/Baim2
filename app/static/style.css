@@ -147,12 +147,33 @@ button {
   cursor: pointer;
 }
 
+button.secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
 .alert {
   background: rgba(34, 211, 238, 0.15);
   border: 1px solid rgba(34, 211, 238, 0.4);
   padding: 10px 12px;
   border-radius: 8px;
   margin-bottom: 16px;
+}
+
+.details {
+  margin: 16px 0;
+  padding-left: 18px;
+  color: var(--text);
+}
+
+.details li {
+  margin-bottom: 8px;
+  color: var(--muted);
+}
+
+.details strong {
+  color: var(--text);
 }
 
 .footnote {
