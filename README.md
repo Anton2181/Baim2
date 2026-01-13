@@ -39,9 +39,23 @@ Aplikacja wystartuje na `http://127.0.0.1:5000`.
 
 1. Zaloguj się na stronie głównej – **klasyczne SQLi nie działa** (login jest parametryzowany).
 2. Wejdź w **Password recovery**.
-3. Zauważ, że niezależnie od podanego emaila odpowiedź zawsze brzmi: "If the account exists, an email has been sent.".
+3. Zauważ, że pole **nie waliduje** poprawności emaila, a odpowiedź zawsze brzmi: "If the account exists, an email has been sent.".
 4. To wymusza **time‑based SQLi** jako jedyny kanał potwierdzania warunków.
 5. Użyj pomiaru czasu odpowiedzi do wnioskowania o danych (np. testy warunkowe z opóźnieniem).
+
+## Skrypt do time‑based ekstrakcji hasha (dla konta admin)
+
+Skrypt automatycznie wydobywa hash `password_hash` użytkownika `admin` wyłącznie na podstawie czasu odpowiedzi i na bieżąco dopisuje znalezione znaki:
+
+```bash
+./scripts/attack_timed_sqli.py --base-url http://127.0.0.1:5000
+```
+
+Opcje:
+
+- `--delay` — opóźnienie w sekundach używane w SQL (`sleep`),
+- `--threshold` — próg czasowy uznający trafienie,
+- `--charset` — zestaw znaków do sprawdzania.
 
 ## Testy (sprawdzenie, że podatność jest tylko time‑based)
 
@@ -69,4 +83,5 @@ scripts/
   setup.sh
   run.sh
   test.sh
+  attack_timed_sqli.py
 ```
