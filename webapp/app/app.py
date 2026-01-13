@@ -111,16 +111,23 @@ def webmin_proxy_root(subpath: str | None = None) -> Response:
     }
     headers["X-Internal-Auth"] = app.config["WEBMIN_PROXY_TOKEN"]
 
-    upstream_response = requests.request(
-        method=request.method,
-        url=target_url,
-        headers=headers,
-        data=request.get_data(),
-        cookies=request.cookies,
-        allow_redirects=False,
-        stream=True,
-        timeout=15,
-    )
+    try:
+        upstream_response = requests.request(
+            method=request.method,
+            url=target_url,
+            headers=headers,
+            data=request.get_data(),
+            cookies=request.cookies,
+            allow_redirects=False,
+            stream=True,
+            timeout=15,
+        )
+    except requests.RequestException:
+        return Response(
+            "Webmin proxy error: unable to reach upstream service.",
+            status=502,
+            content_type="text/plain; charset=utf-8",
+        )
 
     excluded_headers = {"content-encoding", "content-length", "transfer-encoding", "connection"}
     response_headers = [
