@@ -78,11 +78,12 @@ if [[ -n ${sudo_prefix} ]] || [[ ${EUID:-$(id -u)} -eq 0 ]]; then
     ProxyPreserveHost On
     RequestHeader set X-Forwarded-Proto "http"
 
-    ProxyPass /admin/infra/ http://${WEBMIN_HOST}:${WEBMIN_PORT}/admin/infra/
-    ProxyPassReverse /admin/infra/ http://${WEBMIN_HOST}:${WEBMIN_PORT}/admin/infra/
-    ProxyPass /admin/infra http://${WEBMIN_HOST}:${WEBMIN_PORT}/admin/infra
-    ProxyPassReverse /admin/infra http://${WEBMIN_HOST}:${WEBMIN_PORT}/admin/infra
+    # Webmin exposed under /admin/infra/ (backend is root /)
+    ProxyPass /admin/infra/ http://${WEBMIN_HOST}:${WEBMIN_PORT}/ nocanon
+    ProxyPassReverse /admin/infra/ http://${WEBMIN_HOST}:${WEBMIN_PORT}/
+    ProxyPassReverseCookiePath / /admin/infra
 
+    # Your webapp
     ProxyPass / http://127.0.0.1:${PORT}/
     ProxyPassReverse / http://127.0.0.1:${PORT}/
 </VirtualHost>

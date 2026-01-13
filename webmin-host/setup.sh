@@ -18,7 +18,7 @@ WEBMIN_LOG_DIR="${WEBMIN_LOG_DIR:-/var/webmin}"
 WEBMIN_PERL_PATH="${WEBMIN_PERL_PATH:-/usr/bin/perl}"
 WEBAPP_IP="${WEBAPP_IP:-192.168.100.10}"
 WEBMIN_WEBPREFIX="${WEBMIN_WEBPREFIX:-/admin/infra}"
-WEBAPP_HOST="${WEBAPP_HOST:-192.168.100.10:5000}"
+WEBAPP_HOST="${WEBAPP_HOST:-192.168.100.10}"
 WEBMIN_REDIRECT_HOST="${WEBMIN_REDIRECT_HOST:-${WEBAPP_HOST}}"
 
 configure_network() {
@@ -112,7 +112,6 @@ if [[ -f /etc/webmin/miniserv.conf ]]; then
   {
     echo "bind=${WEBMIN_IP}"
     echo "allow=${WEBAPP_IP} 127.0.0.1"
-    echo "deny=0.0.0.0/0"
     echo "redirect_prefix=${WEBMIN_WEBPREFIX}"
     echo "cookiepath=${WEBMIN_WEBPREFIX}"
     echo "redirect_host=${WEBMIN_REDIRECT_HOST}"

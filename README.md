@@ -131,7 +131,7 @@ Skrypt wspiera też `WEBMIN_PORT`, `WEBMIN_SSL` oraz `WEBMIN_START_BOOT`.
 Adres IP dla tego hosta jest ustawiany na `192.168.100.20/24` (możesz nadpisać przez `WEBMIN_IP`, `WEBMIN_NETMASK`).
 Jeśli instalacja Webmina zgłasza błąd katalogów konfig/logów, możesz ustawić `WEBMIN_CONFIG_DIR` i `WEBMIN_LOG_DIR` (domyślnie `/etc/webmin` i `/var/webmin`). W razie problemów z Perlem ustaw `WEBMIN_PERL_PATH` (domyślnie `/usr/bin/perl`).
 Port Webmina jest domyślnie dostępny tylko z IP WebApp (`192.168.100.10`). Możesz nadpisać je przez `WEBAPP_IP`.
-Reverse proxy ustawia Webmin pod ścieżką `/admin/infra` (możesz nadpisać przez `WEBMIN_WEBPREFIX`), a referer akceptowany przez Webmina jest ustawiany na host WebApp (domyślnie `192.168.100.10:5000`, zmienna `WEBAPP_HOST`). Możesz też nadpisać `WEBMIN_REDIRECT_HOST`, jeśli proxy działa pod innym hostem.
+Reverse proxy ustawia Webmin pod ścieżką `/admin/infra` (możesz nadpisać przez `WEBMIN_WEBPREFIX`), a referer akceptowany przez Webmina jest ustawiany na host WebApp (domyślnie `192.168.100.10`, zmienna `WEBAPP_HOST`). Możesz też nadpisać `WEBMIN_REDIRECT_HOST`, jeśli proxy działa pod innym hostem.
 
 Po instalacji Webmin będzie dostępny tylko przez WebApp (direct access do `http://<IP>:10000` powinien być blokowany).
 
@@ -144,7 +144,7 @@ Adres Webmina można ustawić przez `WEBMIN_URL`, domyślnie `http://192.168.100
 
 Skrypt `webapp/scripts/setup.sh` konfiguruje Apache tak, aby:
 - `/` trafiało do aplikacji Flask na porcie 5000,
-- `/admin/infra` było proxowane bezpośrednio do Webmina na VM2.
+- `/admin/infra` było proxowane bezpośrednio do Webmina na VM2 (backend root `/`).
 
 Domyślne wartości możesz nadpisać:
 - `WEBAPP_SERVER_NAME` (domyślnie `192.168.100.10`)
