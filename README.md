@@ -1,18 +1,21 @@
-# Baim2 – CTF (część 1)
+# Baim2 – CTF (część 1 + host Webmin)
 
-Poniżej znajduje się pierwsza część CTF-a: prosta aplikacja webowa z bezpiecznym logowaniem i celową podatnością **time‑based SQLi** w funkcji resetu hasła. Aplikacja ma stały output (nie ujawnia, czy email istnieje), więc:
+Repozytorium jest podzielone na dwie części odpowiadające dwóm hostom:
 
-- **UNION / error-based / boolean-based** nie działają na podstawie treści odpowiedzi,
-- jedynym kanałem jest **czas odpowiedzi**.
+- `webapp/` – prosta aplikacja webowa z podatnością **time‑based SQLi** w resetowaniu hasła.
+- `webmin-host/` – host z podatnym **Webmin 1.920** (CVE‑2019‑15107).
 
-## Wymagania
+## Host: webapp
+
+### Wymagania
 
 - Linux z Pythonem 3.10+
 - Dostęp do internetu do instalacji zależności (pip)
 
-## Instalacja
+### Instalacja
 
 ```bash
+cd webapp
 ./scripts/setup.sh
 ```
 
@@ -21,21 +24,22 @@ Skrypt:
 - instaluje zależności z `requirements.txt`,
 - inicjalizuje bazę danych SQLite.
 
-## Uruchomienie
+### Uruchomienie
 
 ```bash
+cd webapp
 ./scripts/run.sh
 ```
 
 Aplikacja wystartuje na `http://127.0.0.1:5000`.
 
-### Dane testowe
+#### Dane testowe
 
 - login: `admin`
 - hasło: `admin123`
 - email: `admin@ctf.local`
 
-## Jak wykonać zadanie (instrukcja dla gracza)
+### Jak wykonać zadanie (instrukcja dla gracza)
 
 1. Zaloguj się na stronie głównej – **klasyczne SQLi nie działa** (login jest parametryzowany).
 2. Wejdź w **Password recovery**.
@@ -43,11 +47,12 @@ Aplikacja wystartuje na `http://127.0.0.1:5000`.
 4. To wymusza **time‑based SQLi** jako jedyny kanał potwierdzania warunków.
 5. Użyj pomiaru czasu odpowiedzi do wnioskowania o danych (np. testy warunkowe z opóźnieniem).
 
-## Skrypt do time‑based ekstrakcji hasha (dla konta admin)
+### Skrypt do time‑based ekstrakcji hasha (dla konta admin)
 
 Skrypt automatycznie wydobywa hash `password_hash` (MD5) użytkownika `admin` wyłącznie na podstawie czasu odpowiedzi i na bieżąco dopisuje znalezione znaki:
 
 ```bash
+cd webapp
 ./scripts/attack_timed_sqli.py --base-url http://127.0.0.1:5000
 ```
 
@@ -57,11 +62,12 @@ Opcje:
 - `--threshold` — próg czasowy uznający trafienie,
 - `--charset` — zestaw znaków do sprawdzania.
 
-## Testy (sprawdzenie, że podatność jest tylko time‑based)
+### Testy (sprawdzenie, że podatność jest tylko time‑based)
 
 Uruchom aplikację w jednym terminalu, a w drugim:
 
 ```bash
+cd webapp
 ./scripts/test.sh
 ```
 
@@ -71,17 +77,39 @@ Skrypt testowy sprawdza:
 - identyczny output dla istniejącego i nieistniejącego emaila,
 - wyraźne opóźnienie odpowiedzi tylko przy time‑based SQLi.
 
-## Struktura projektu
+### Struktura
 
 ```
-app/
-  app.py            # aplikacja Flask
-  init_db.py        # inicjalizacja bazy
-  templates/        # HTML
-  static/style.css  # oprawa graficzna
-scripts/
+webapp/
+  app/
+    app.py            # aplikacja Flask
+    init_db.py        # inicjalizacja bazy
+    templates/        # HTML
+    static/style.css  # oprawa graficzna
+  scripts/
+    setup.sh
+    run.sh
+    test.sh
+    attack_timed_sqli.py
+  requirements.txt
+```
+
+## Host: webmin
+
+### Instalacja
+
+Skrypt w `webmin-host/setup.sh` pobiera i instaluje **Webmin 1.920** z SourceForge (wersja podatna na CVE‑2019‑15107).
+
+```bash
+cd webmin-host
+sudo ./setup.sh
+```
+
+Po instalacji Webmin będzie dostępny pod `https://<IP>:10000` (upewnij się, że port 10000 jest otwarty).
+
+### Struktura
+
+```
+webmin-host/
   setup.sh
-  run.sh
-  test.sh
-  attack_timed_sqli.py
 ```
