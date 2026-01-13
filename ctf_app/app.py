@@ -75,7 +75,10 @@ def login():
                         (username, int(success), datetime.now(timezone.utc)),
                     )
                     if success:
-                        message = "Login successful!"
+                        return render_template(
+                            "post_login.html",
+                            username=username,
+                        )
                     else:
                         message = "Login failed."
 
