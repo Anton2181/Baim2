@@ -93,9 +93,9 @@ Environment options:
 - `BASE_URL` (default `http://127.0.0.1:5000`)
 - `DELAY` (default `3`)
 
-### 2) Hash extraction (time-based, no wordlist)
+### 2) Hash extraction (time-based)
 
-This script rebuilds the stored hash **character by character** using a time-based `IF(..., SLEEP, ...)` condition. It does not use any wordlist; instead it brute-forces each hash position from a character set (default: hex for SHA-256).
+This script rebuilds the stored hash **character by character** using a time-based `IF(..., SLEEP, ...)` condition. It brute-forces each hash position from a character set (default: hex for SHA-256).
 
 ```bash
 python3 scripts/time_sqli_wordlist.py --base-url http://127.0.0.1:5000 \
