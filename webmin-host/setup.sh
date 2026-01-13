@@ -15,6 +15,7 @@ WEBMIN_IP="${WEBMIN_IP:-192.168.100.20}"
 WEBMIN_NETMASK="${WEBMIN_NETMASK:-255.255.255.0}"
 WEBMIN_CONFIG_DIR="${WEBMIN_CONFIG_DIR:-/etc/webmin}"
 WEBMIN_LOG_DIR="${WEBMIN_LOG_DIR:-/var/webmin}"
+WEBMIN_PERL_PATH="${WEBMIN_PERL_PATH:-/usr/bin/perl}"
 
 configure_network() {
   local port="${WEBMIN_HTTP_PORT}"
@@ -60,7 +61,7 @@ if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
 fi
 
 apt-get update -y >/dev/null 2>&1 || true
-apt-get install -y curl python3.13-venv >/dev/null 2>&1 || true
+apt-get install -y curl perl python3.13-venv >/dev/null 2>&1 || true
 
 tmp_dir=$(mktemp -d)
 cleanup() {
@@ -82,6 +83,7 @@ echo "Running Webmin setup (accepting defaults)..."
 cat <<EOF | ./setup.sh "${INSTALL_DIR}"
 ${WEBMIN_CONFIG_DIR}
 ${WEBMIN_LOG_DIR}
+${WEBMIN_PERL_PATH}
 ${WEBMIN_PORT}
 ${WEBMIN_LOGIN}
 ${WEBMIN_PASSWORD}
