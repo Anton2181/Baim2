@@ -71,5 +71,6 @@ pip install --upgrade pip
 pip install -r requirements.txt
 
 python app/init_db.py
+chmod +x ./scripts/run.sh ./scripts/setup.sh ./scripts/test.sh ./scripts/attack_timed_sqli.py
 
 echo "Setup complete. Run ./scripts/run.sh to start the app."
