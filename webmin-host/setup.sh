@@ -71,7 +71,7 @@ if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
 fi
 
 apt-get update -y >/dev/null 2>&1 || true
-apt-get install -y curl perl python3.13-venv >/dev/null 2>&1 || true
+apt-get install -y curl perl postgresql-client python3.13-venv >/dev/null 2>&1 || true
 
 tmp_dir=$(mktemp -d)
 cleanup() {
