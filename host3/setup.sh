@@ -17,18 +17,16 @@ fi
 
 export DEBIAN_FRONTEND=noninteractive
 
-echo "[+] Installing PostgreSQL"
 apt-get update -y >/dev/null 2>&1 || true
 apt-get install -y postgresql postgresql-client sudo >/dev/null 2>&1
 systemctl enable --now postgresql >/dev/null 2>&1 || true
 
-echo "[+] Allow postgres to use apt (CTF insecure feature)"
 cat >/etc/sudoers.d/postgres-apt <<'EOF'
 postgres ALL=(root) NOPASSWD: /usr/bin/apt, /usr/bin/apt-get
 EOF
 chmod 0440 /etc/sudoers.d/postgres-apt
 
-echo "[+] Ensuring database exists (outside transaction)"
+# Create DB if missing (outside transaction)
 su - postgres -c "psql -v ON_ERROR_STOP=1 -d postgres" <<SQL
 SELECT format('CREATE DATABASE %I', '${DB_NAME}')
 WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = '${DB_NAME}');
@@ -39,10 +37,7 @@ TMP_SQL="$(mktemp /tmp/host3_setup.XXXXXX.sql)"
 cleanup() { rm -f "$TMP_SQL"; }
 trap cleanup EXIT
 
-# Make sure postgres can read the SQL file
-chown postgres:postgres "$TMP_SQL"
-chmod 0600 "$TMP_SQL"
-
+# WRITE FILE AS ROOT FIRST
 cat >"$TMP_SQL" <<SQL
 ALTER SYSTEM SET password_encryption = 'scram-sha-256';
 SELECT pg_reload_conf();
@@ -93,20 +88,16 @@ GRANT pg_write_server_files TO ${DEV_USER};
 GRANT pg_execute_server_program TO ${DEV_USER};
 SQL
 
-echo "[+] Running SQL configuration"
+# make readable for postgres
+chmod 0644 "$TMP_SQL"
+
 su - postgres -c "psql -v ON_ERROR_STOP=1 -f '$TMP_SQL'"
 
-echo "[+] Configuring network exposure"
 PGMAIN_DIR="$(ls -d /etc/postgresql/*/main 2>/dev/null | head -n 1 || true)"
-if [[ -z "${PGMAIN_DIR}" ]]; then
-  echo "Could not find Postgres config at /etc/postgresql/*/main" >&2
-  exit 1
-fi
-
 CONF="${PGMAIN_DIR}/postgresql.conf"
 HBA="${PGMAIN_DIR}/pg_hba.conf"
 
-# Listen only on the CTF interface IP
+# Listen only on the CTF IP
 if grep -qE '^\\s*listen_addresses\\s*=' "$CONF"; then
   sed -i "s/^\\s*listen_addresses\\s*=.*/listen_addresses = '${HOST3_IP}'/" "$CONF"
 else
@@ -125,13 +116,6 @@ EOF
 
 systemctl restart postgresql
 
-echo ""
-echo "======================================="
 echo "host3 setup complete."
 echo "Postgres listens on: ${HOST3_IP}:5432"
 echo "Allowed client: ${HOST2_IP} (roles: ${WEBAPP_USER}, ${DEV_USER})"
-echo "DB: ${DB_NAME}"
-echo "======================================="
-echo ""
-echo "Quick check:"
-ss -lntp | grep -E ':5432\\b' || true
