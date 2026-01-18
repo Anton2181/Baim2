@@ -4,7 +4,7 @@ set -euo pipefail
 PORT=5000
 WEBAPP_IP="${WEBAPP_IP:-192.168.100.10}"
 WEBAPP_NETMASK="${WEBAPP_NETMASK:-255.255.255.0}"
-WEBAPP_SERVER_NAME="${WEBAPP_SERVER_NAME:-host1}"
+WEBAPP_SERVER_NAME="${WEBAPP_SERVER_NAME:-192.168.100.10}"
 WEBMIN_HOST="${WEBMIN_HOST:-192.168.100.20}"
 WEBMIN_PORT="${WEBMIN_PORT:-10000}"
 
@@ -95,21 +95,28 @@ configure_apache() {
 <VirtualHost *:80>
     ServerName ${WEBAPP_SERVER_NAME}
     ServerAlias *
+
     ProxyPreserveHost On
 
-    # /admin/infra without trailing slash -> add slash
-    RedirectMatch 301 ^/admin/infra$ /admin/infra/
-
-    # --- WEBMIN (cookie rewrite only here) ---
+    # --- WEBMIN PROXY ---
     <Location /admin/infra/>
-        ProxyPass        http://${WEBMIN_HOST}:${WEBMIN_PORT}/ nocanon
+        ProxyPass http://${WEBMIN_HOST}:${WEBMIN_PORT}/ nocanon
         ProxyPassReverse http://${WEBMIN_HOST}:${WEBMIN_PORT}/
+
         ProxyPassReverseCookiePath / /admin/infra
         ProxyPassReverseCookieDomain ${WEBMIN_HOST} ${WEBAPP_IP}
+
+        RequestHeader set X-Forwarded-Proto "http"
+        RequestHeader set X-Forwarded-Host "${WEBAPP_IP}"
+        RequestHeader set X-Forwarded-Port "80"
+
+        Header edit Location "^http://${WEBMIN_HOST}:${WEBMIN_PORT}(/.*)?$" "/admin/infra$1"
+        Header edit Location "^http://${WEBAPP_IP}:${WEBMIN_PORT}(/.*)?$" "/admin/infra$1"
+        Header edit Location "^/(?!admin/infra)(.*)$" "/admin/infra/$1"
     </Location>
 
-    # --- WEBAPP (no cookie path rewrite) ---
-    ProxyPass        / http://127.0.0.1:${PORT}/
+    # --- WEBAPP ---
+    ProxyPass / http://127.0.0.1:${PORT}/
     ProxyPassReverse / http://127.0.0.1:${PORT}/
 </VirtualHost>
 EOF_APACHE
