@@ -13,7 +13,8 @@ DB_PATH = BASE_DIR / "data" / "app.db"
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "ctf-local-secret"
-app.config["SESSION_COOKIE_NAME"] = os.getenv("WEBAPP_SESSION_COOKIE", "webapp_session")
+app.config["SESSION_COOKIE_NAME"] = "ctf_webapp_session"
+app.config["SESSION_COOKIE_PATH"] = "/"
 
 
 def get_db() -> sqlite3.Connection:
@@ -79,7 +80,10 @@ def reset_submit() -> str:
 @app.get("/logout")
 def logout() -> str:
     session.pop("user", None)
-    return redirect(url_for("index"))
+    response = redirect(url_for("index"))
+    response.delete_cookie(app.config["SESSION_COOKIE_NAME"], path="/")
+    response.delete_cookie(app.config["SESSION_COOKIE_NAME"], path="/admin/infra")
+    return response
 
 
 @app.get("/admin/webmin")
