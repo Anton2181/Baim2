@@ -6,7 +6,7 @@ import sqlite3
 import time
 from pathlib import Path
 
-from flask import Flask, redirect, render_template, request, session, url_for
+from flask import Flask, redirect, render_template, request, session, url_for, make_response
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "data" / "app.db"
@@ -80,7 +80,7 @@ def reset_submit() -> str:
 @app.get("/logout")
 def logout() -> str:
     session.pop("user", None)
-    response = redirect(url_for("index"))
+    response = make_response(redirect(url_for("index")))
     response.delete_cookie(app.config["SESSION_COOKIE_NAME"], path="/")
     response.delete_cookie(app.config["SESSION_COOKIE_NAME"], path="/admin/infra")
     return response
