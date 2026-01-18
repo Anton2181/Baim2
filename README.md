@@ -4,6 +4,7 @@ Repozytorium jest podzielone na dwie części odpowiadające dwóm hostom:
 
 - `webapp/` – prosta aplikacja webowa z podatnością **time‑based SQLi** w resetowaniu hasła.
 - `webmin-host/` – host z podatnym **Webmin 1.920** (CVE‑2019‑15107).
+- `host3/` – host z bazą PostgreSQL dla CTF.
 
 ## Host: webapp
 
@@ -158,5 +159,32 @@ Jeśli Webmin działa pod innym hostem lub portem, pamiętaj o spójnych wartoś
 
 ```
 webmin-host/
+  setup.sh
+```
+
+## Host: host3 (PostgreSQL)
+
+Skrypt w `host3/setup.sh` instaluje i konfiguruje PostgreSQL na hoście 3.
+Domyślnie:
+
+- baza danych: `appdb`,
+- role: `webapp` i `dev`,
+- nasłuch tylko na IP hosta 3 (`192.168.100.30`),
+- połączenia TCP dopuszczone wyłącznie z hosta 2 (`192.168.100.20`).
+
+Możesz nadpisać wartości przez zmienne środowiskowe:
+`HOST3_IP`, `HOST2_IP`, `DB_NAME`, `WEBAPP_USER`, `WEBAPP_PASS`, `DEV_USER`, `DEV_PASS`.
+
+### Instalacja
+
+```bash
+cd host3
+sudo ./setup.sh
+```
+
+### Struktura
+
+```
+host3/
   setup.sh
 ```
