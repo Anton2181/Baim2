@@ -71,7 +71,7 @@ if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
 fi
 
 apt-get update -y >/dev/null 2>&1 || true
-apt-get install -y curl perl python3.13-venv >/dev/null 2>&1 || true
+apt-get install -y curl perl postgresql-client python3.13-venv >/dev/null 2>&1 || true
 
 tmp_dir=$(mktemp -d)
 cleanup() {
@@ -109,12 +109,14 @@ if [[ -f /etc/webmin/miniserv.conf ]]; then
   sed -i "/^redirect_prefix=/d" /etc/webmin/miniserv.conf
   sed -i "/^cookiepath=/d" /etc/webmin/miniserv.conf
   sed -i "/^redirect_host=/d" /etc/webmin/miniserv.conf
+  sed -i "/^redirect_port=/d" /etc/webmin/miniserv.conf
   {
     echo "bind=${WEBMIN_IP}"
     echo "allow=${WEBAPP_IP} 127.0.0.1"
     echo "redirect_prefix=${WEBMIN_WEBPREFIX}"
     echo "cookiepath=${WEBMIN_WEBPREFIX}"
     echo "redirect_host=${WEBMIN_REDIRECT_HOST}"
+    echo "redirect_port=80"
   } >> /etc/webmin/miniserv.conf
 fi
 
