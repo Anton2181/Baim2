@@ -29,7 +29,6 @@ EOF
 chmod 0440 /etc/sudoers.d/postgres-apt
 
 echo "[+] Ensuring database exists (outside transaction)"
-# This uses \gexec to run CREATE DATABASE only if missing.
 su - postgres -c "psql -v ON_ERROR_STOP=1 -d postgres" <<SQL
 SELECT format('CREATE DATABASE %I', '${DB_NAME}')
 WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = '${DB_NAME}');
@@ -39,6 +38,10 @@ SQL
 TMP_SQL="$(mktemp /tmp/host3_setup.XXXXXX.sql)"
 cleanup() { rm -f "$TMP_SQL"; }
 trap cleanup EXIT
+
+# Make sure postgres can read the SQL file
+chown postgres:postgres "$TMP_SQL"
+chmod 0600 "$TMP_SQL"
 
 cat >"$TMP_SQL" <<SQL
 ALTER SYSTEM SET password_encryption = 'scram-sha-256';
@@ -129,3 +132,6 @@ echo "Postgres listens on: ${HOST3_IP}:5432"
 echo "Allowed client: ${HOST2_IP} (roles: ${WEBAPP_USER}, ${DEV_USER})"
 echo "DB: ${DB_NAME}"
 echo "======================================="
+echo ""
+echo "Quick check:"
+ss -lntp | grep -E ':5432\\b' || true
