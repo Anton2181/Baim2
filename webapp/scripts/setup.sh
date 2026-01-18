@@ -95,20 +95,22 @@ configure_apache() {
 <VirtualHost *:80>
     ServerName ${WEBAPP_SERVER_NAME}
     ServerAlias *
-
     ProxyPreserveHost On
 
-    # 1) WEBMIN (must be BEFORE ProxyPass /)
+    # /admin/infra without trailing slash -> add slash
     RedirectMatch 301 ^/admin/infra$ /admin/infra/
 
-    ProxyPass        /admin/infra/  http://${WEBMIN_HOST}:${WEBMIN_PORT}/ nocanon
-    ProxyPassReverse /admin/infra/  http://${WEBMIN_HOST}:${WEBMIN_PORT}/
-    ProxyPassReverseCookiePath / /admin/infra
-    ProxyPassReverseCookieDomain ${WEBMIN_HOST} ${WEBAPP_IP}
+    # --- WEBMIN (cookie rewrite only here) ---
+    <Location /admin/infra/>
+        ProxyPass        http://${WEBMIN_HOST}:${WEBMIN_PORT}/ nocanon
+        ProxyPassReverse http://${WEBMIN_HOST}:${WEBMIN_PORT}/
+        ProxyPassReverseCookiePath / /admin/infra
+        ProxyPassReverseCookieDomain ${WEBMIN_HOST} ${WEBAPP_IP}
+    </Location>
 
-    # 2) FLASK
-    ProxyPass        /  http://127.0.0.1:${PORT}/
-    ProxyPassReverse /  http://127.0.0.1:${PORT}/
+    # --- WEBAPP (no cookie path rewrite) ---
+    ProxyPass        / http://127.0.0.1:${PORT}/
+    ProxyPassReverse / http://127.0.0.1:${PORT}/
 </VirtualHost>
 EOF_APACHE
 
